@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.a30467984.deaddyspy.ShowSpeedometer">
+
+    <FrameLayout
+        android:id="@+id/high_speed_fragment"
+        android:layout_width="183dp"
+        android:layout_height="188dp"
+        android:layout_above="@+id/low_textView_location"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="81dp"
+        android:background="@color/colorPrimaryDark"
+        android:foregroundGravity="center">
+
+        <TextView
+            android:id="@+id/speed_number"
+            android:layout_width="267dp"
+            android:layout_height="28dp"
+            android:layout_below="@+id/text_speed_unit"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:text="km"
+            android:textColor="@android:color/white"
+            android:textSize="15dp"
+            tools:layout_editor_absoluteX="109dp"
+            tools:layout_editor_absoluteY="196dp" />
+
+        <TextView
+            android:id="@+id/text_speed_unit"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:layout_above="@+id/low_textView_location"
+            android:layout_alignLeft="@+id/high_speed_fragment"
+            android:layout_alignStart="@+id/high_speed_fragment"
+            android:layout_marginBottom="44dp"
+            android:gravity="center"
+            android:text="0"
+            android:textColor="@android:color/white"
+            android:textSize="120dp" />
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/low_textView_location"
+        android:layout_width="254dp"
+        android:layout_height="231dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="22dp"
+        android:layout_marginEnd="49dp"
+        android:layout_marginRight="49dp"
+        android:text="TextView"
+        tools:layout_editor_absoluteX="65dp"
+        tools:layout_editor_absoluteY="247dp" />
+
+</RelativeLayout>
