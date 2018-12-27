@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:keepScreenOn="true"
     tools:context="com.example.a30467984.deaddyspy.ShowSpeedometer">
 
     <FrameLayout
@@ -17,10 +18,13 @@
         android:foregroundGravity="center">
 
         <TextView
-            android:id="@+id/speed_number"
+            android:id="@+id/speed_unit"
             android:layout_width="267dp"
             android:layout_height="28dp"
-            android:layout_below="@+id/text_speed_unit"
+            android:layout_above="@+id/low_textView_location"
+            android:layout_alignLeft="@+id/high_speed_fragment"
+            android:layout_alignStart="@+id/high_speed_fragment"
+            android:layout_marginBottom="53dp"
             android:gravity="center"
             android:orientation="vertical"
             android:text="km"
@@ -30,12 +34,9 @@
             tools:layout_editor_absoluteY="196dp" />
 
         <TextView
-            android:id="@+id/text_speed_unit"
+            android:id="@+id/speed_number"
             android:layout_width="match_parent"
             android:layout_height="160dp"
-            android:layout_above="@+id/low_textView_location"
-            android:layout_alignLeft="@+id/high_speed_fragment"
-            android:layout_alignStart="@+id/high_speed_fragment"
             android:layout_marginBottom="44dp"
             android:gravity="center"
             android:text="0"
@@ -54,7 +55,7 @@
         android:layout_marginBottom="22dp"
         android:layout_marginEnd="49dp"
         android:layout_marginRight="49dp"
-        android:text="TextView"
+        android:textSize="20sp"
         tools:layout_editor_absoluteX="65dp"
         tools:layout_editor_absoluteY="247dp" />
 

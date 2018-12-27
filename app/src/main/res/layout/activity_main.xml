@@ -16,6 +16,7 @@
         android:layout_alignStart="@+id/main_button_history"
         android:layout_marginTop="88dp"
         android:onClick="startSpeedometer"
+        android:background="@drawable/switch_button_bg"
         android:text="GPS"
         tools:layout_editor_absoluteX="57dp" />
 
@@ -26,7 +27,9 @@
         android:layout_alignLeft="@+id/main_button_speedometr"
         android:layout_alignStart="@+id/main_button_speedometr"
         android:layout_centerVertical="true"
+        android:onClick="startSettingsManager"
         android:text="Settings"
+        android:background="@drawable/switch_button_bg"
         tools:layout_editor_absoluteX="69dp"
         tools:layout_editor_absoluteY="388dp" />
 
@@ -37,6 +40,8 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="68dp"
+        android:background="@drawable/switch_button_bg"
+        android:onClick="showHistory"
         android:text="History" />
 
      />

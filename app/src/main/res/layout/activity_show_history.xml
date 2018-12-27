@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/historyFrameLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/scrollTable"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/table_background_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/tableBackground"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/last_ride_button"
+                    android:layout_width="133dp"
+                    android:layout_height="118dp"
+                    android:onClick="openLastRide"
+                    android:text="@string/history_button_last"
+                    tools:layout_editor_absoluteX="55dp"
+                    tools:layout_editor_absoluteY="99dp" />
+
+                <Button
+                    android:id="@+id/history_list_button"
+                    android:layout_width="138dp"
+                    android:layout_height="116dp"
+                    android:onClick="openHistoryList"
+                    android:text="@string/history_button_list"
+                    tools:layout_editor_absoluteX="210dp"
+                    tools:layout_editor_absoluteY="101dp" />
+
+                <TableLayout
+                    android:id="@+id/ride_table"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+
+                    android:visibility="invisible">
+
+                </TableLayout>
+                <!--<Button
+                    android:id="@+id/open_map_button"
+                    android:layout_width="138dp"
+                    android:layout_height="116dp"
+                    android:onClick="openMap"
+                    android:text="@string/history_button_list"
+                    tools:layout_editor_absoluteX="210dp"
+                    tools:layout_editor_absoluteY="101dp" />-->
+            </LinearLayout>
+
+        </HorizontalScrollView>
+
+    </ScrollView>
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/history_list_view"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible"
+        android:choiceMode="multipleChoice" />
+</FrameLayout>
