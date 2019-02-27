@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources><string name="app_name">Deaddy Spy</string>
+    <string name="app_scale">יחידת מדידה</string>
+    <string name="app_speed_record">שמור נתונים על המכשיר</string>
+    <string name="history_button_last">נסיעה אחרונה</string>
+    <string name="history_button_list">רשימת נסיעות</string>
+    <string name="google_maps_key">AIzaSyColoGQ7stZsEVK5KbuFW_W8J6abjMZMvM </string>
+    <string name="title_activity_maps">map</string>
+    <string name="waiting_gps">ממתין לקליטת GPS</string>
+    <string name="history">היסטוריה</string>
+    <string name="settings">הגדרות</string>
+    <string name="language">שפה</string>
+</resources>

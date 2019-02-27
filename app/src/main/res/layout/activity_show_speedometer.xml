@@ -9,12 +9,11 @@
 
     <FrameLayout
         android:id="@+id/high_speed_fragment"
-        android:layout_width="183dp"
+        android:layout_width="250dp"
         android:layout_height="188dp"
-        android:layout_above="@+id/low_textView_location"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="81dp"
-        android:background="@color/colorPrimaryDark"
+        android:background="@drawable/sppeed_aert_border"
         android:foregroundGravity="center">
 
         <TextView
@@ -27,7 +26,7 @@
             android:layout_marginBottom="53dp"
             android:gravity="center"
             android:orientation="vertical"
-            android:text="km"
+            android:text="km/h"
             android:textColor="@android:color/white"
             android:textSize="15dp"
             tools:layout_editor_absoluteX="109dp"
@@ -36,12 +35,27 @@
         <TextView
             android:id="@+id/speed_number"
             android:layout_width="match_parent"
-            android:layout_height="160dp"
+            android:layout_height="145dp"
             android:layout_marginBottom="44dp"
             android:gravity="center"
             android:text="0"
             android:textColor="@android:color/white"
             android:textSize="120dp" />
+
+        <TextView
+            android:id="@+id/no_gps_signal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignLeft="@+id/high_speed_fragment"
+            android:layout_alignParentTop="true"
+            android:layout_alignStart="@+id/high_speed_fragment"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/common_google_signin_btn_text_dark_default"
+            android:gravity="bottom|center"
+            android:text="@string/waiting_gps"
+            tools:background="@color/common_google_signin_btn_text_dark_default"
+            tools:textColor="@android:color/white"
+            tools:visibility="invisible" />
 
     </FrameLayout>
 

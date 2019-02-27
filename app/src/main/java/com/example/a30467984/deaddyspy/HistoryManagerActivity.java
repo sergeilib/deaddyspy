@@ -1,12 +1,17 @@
 package com.example.a30467984.deaddyspy;
 
+import android.app.Activity;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.View;
@@ -27,22 +32,27 @@ import com.example.a30467984.deaddyspy.DAO.RoutingRepo;
 import com.example.a30467984.deaddyspy.DAO.Settings;
 import com.example.a30467984.deaddyspy.DAO.SettingsRepo;
 import com.example.a30467984.deaddyspy.gps.LocationData;
+import com.example.a30467984.deaddyspy.utils.CsvCreator;
 
 import java.lang.reflect.Array;
 import java.net.FileNameMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import static android.view.Gravity.BOTTOM;
 
 /**
  * Created by 30467984 on 8/13/2018.
  */
 
 public class HistoryManagerActivity extends AppCompatActivity {
+    private List<String> fieldList = Arrays.asList("date", "speed","limit","latitude","longitude","place");
     RoutingRepo routingRepo = new RoutingRepo(this);
-
+    ArrayList<String> rideList = new ArrayList<String>();
     SparseBooleanArray sparseBooleanArray ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,12 +64,17 @@ public class HistoryManagerActivity extends AppCompatActivity {
 
     public void openLastRide(View v) {
 
+        int lastRideNum = routingRepo.getMaxTripNumber();
+        if (lastRideNum == 0){
+            Toast.makeText(HistoryManagerActivity.this, "No history was found on this device", Toast.LENGTH_LONG).show();
+            return;
+            //super.onBackPressed();
+        }
         makeButtonsInvisible();
         FrameLayout historyFR = (FrameLayout) findViewById(R.id.historyFrameLayout);
         LinearLayout tableBG = (LinearLayout) findViewById(R.id.table_background_layout);
         TableLayout tl = (TableLayout) findViewById(R.id.ride_table);
         tl.setVisibility(View.VISIBLE);
-        int lastRideNum = routingRepo.getMaxTripNumber();
 
         final ArrayList lasttripData = routingRepo.getLocationListByTripNumber(lastRideNum);
         buildHeader(lasttripData, tl);
@@ -70,7 +85,7 @@ public class HistoryManagerActivity extends AppCompatActivity {
         bt.setText("map");
 
         bt.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.FILL_PARENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
+                FrameLayout.LayoutParams.WRAP_CONTENT, BOTTOM));
         // tableBG.addView(bt);
         historyFR.addView(bt);
         bt.setOnClickListener(new View.OnClickListener() {
@@ -106,9 +121,11 @@ public class HistoryManagerActivity extends AppCompatActivity {
             CountTV.setPadding(5, 5, 5, 0);
 
             tr.addView(CountTV);
+            for (String hmKey : fieldList) {
 
-            while(it.hasNext()){
-                String hmKey = (String)it.next();
+
+            //while(it.hasNext()){
+                //String hmKey = (String)it.next();
                 String hmData = (String) tmpData.get(hmKey);
                 TextView valueTV = new TextView(this);
 
@@ -157,9 +174,9 @@ public class HistoryManagerActivity extends AppCompatActivity {
         headerCountTV.setPadding(5, 5, 5, 0);
 
         tr.addView(headerCountTV);
-
-        while(it.hasNext()){
-            String hmKey = (String)it.next();
+        for (String hmKey : fieldList) {
+        //while(it.hasNext()){
+        //    String hmKey = (String)it.next();
         //    String hmData = (String) tmpData.get(hmKey);
             TextView headerTV = new TextView(this);
 
@@ -188,15 +205,22 @@ public class HistoryManagerActivity extends AppCompatActivity {
 
     public void openHistoryList(View v) {
         final ListView listview;
-
-        makeButtonsInvisible();
-        listview = (ListView)findViewById(R.id.history_list_view);
-        listview.setVisibility(View.VISIBLE);
         final ArrayList tripList = routingRepo.getStartingLocationList();
+        if (tripList.size() == 0){
+            Toast.makeText(HistoryManagerActivity.this, "No history was found on this device", Toast.LENGTH_LONG).show();
+            return;
+            //super.onBackPressed();
+        }
+        makeButtonsInvisible();
+        ConstraintLayout cl_history_list = (ConstraintLayout)findViewById(R.id.constraint_history_list);
+        cl_history_list.setVisibility(View.VISIBLE);
+        listview = (ListView)findViewById(R.id.history_list_view);
+        //listview.setVisibility(View.VISIBLE);
+        //final ArrayList tripList = routingRepo.getStartingLocationList();
         //final String[] listViewItems = new String[tripList.size()];
         final List<String> listViewItems = new ArrayList<String>();
-
-        for (int i = 0; i < tripList.size();i++){
+        //show list in descendind order
+        for (int i = tripList.size()-1; i > 0; i--){
             HashMap<String,String> tmpData = (HashMap<String,String>) tripList.get(i);
 
             String a = tmpData.get("id");
@@ -219,7 +243,7 @@ public class HistoryManagerActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // TODO Auto-generated method stub
-
+                rideList.clear();
                 sparseBooleanArray = listview.getCheckedItemPositions();
 
                 String ValueHolder = "" ;
@@ -231,21 +255,25 @@ public class HistoryManagerActivity extends AppCompatActivity {
                     if (sparseBooleanArray.valueAt(i)) {
 
                         ValueHolder += listViewItems.get(position) + ",";
+                        //int a = sparseBooleanArray.keyAt(i);
+                        //rideList.add(sparseBooleanArray.keyAt(i));
+
+                        HashMap<String,String> chosenData = (HashMap<String,String>) tripList.get(tripList.size()-1 - sparseBooleanArray.keyAt(i));
+                        String a = chosenData.get("trip_number");
+                        rideList.add(a);
                     }
 
                     i++ ;
                 }
 
                 ValueHolder = ValueHolder.replaceAll("(,)*$", "");
-                HashMap<String,String> chosenData = (HashMap<String,String>) tripList.get(position);
-                String a = chosenData.get("trip_number");
-                Toast.makeText(HistoryManagerActivity.this, "ListView Selected Values = " + ValueHolder +
-                        " Trip: " + a  , Toast.LENGTH_LONG).show();
+//                HashMap<String,String> chosenData = (HashMap<String,String>) tripList.get(tripList.size()-1 - position);
+//                String a = chosenData.get("trip_number");
+//                rideList.add(a);
+                Toast.makeText(HistoryManagerActivity.this, "ListView Selected Values = " + ValueHolder , Toast.LENGTH_SHORT).show();
 
             }
         });
-
-
 
     }
 
@@ -254,6 +282,103 @@ public class HistoryManagerActivity extends AppCompatActivity {
         Button history_list_bt = findViewById(R.id.history_list_button);
         last_ride_bt.setVisibility(View.GONE);
         history_list_bt.setVisibility(View.GONE);
+    }
+    public void makeHistoryListInvisible(){
+        ConstraintLayout history_list_bt = findViewById(R.id.constraint_history_list);
+        history_list_bt.setVisibility(View.GONE);
+    }
+
+    public void openHistoryItem(View view){
+        if (rideList.size() > 1 || rideList.size() == 0 ){
+            Toast.makeText(HistoryManagerActivity.this, "Please, choose one item for see the map ", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        //makeButtonsInvisible();
+        makeHistoryListInvisible();
+        FrameLayout historyFR = (FrameLayout) findViewById(R.id.historyFrameLayout);
+        //ConstraintLayout historyFR = (ConstraintLayout) findViewById(R.id.constraint_history_list);
+        LinearLayout tableBG = (LinearLayout) findViewById(R.id.table_background_layout);
+        TableLayout tl = (TableLayout) findViewById(R.id.ride_table);
+        tl.setVisibility(View.VISIBLE);
+
+        final ArrayList lasttripData = routingRepo.getLocationListByTripNumber(Integer.parseInt(rideList.get(0)));
+        buildHeader(lasttripData, tl);
+
+        buildTable(lasttripData, tl);
+
+        Button bt = new Button(this);
+        bt.setText("map");
+
+        bt.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.LEFT|BOTTOM));
+        // tableBG.addView(bt);
+        historyFR.addView(bt);
+        bt.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                openMap(v,lasttripData);
+                // TODO Auto-generated method stub
+            }
+        });
+        Button bt_csv = new Button(this);
+        bt_csv.setText("share");
+
+        bt_csv.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.RIGHT|BOTTOM));
+        // tableBG.addView(bt);
+        historyFR.addView(bt_csv);
+        bt_csv.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                CsvCreator csvCreator = new CsvCreator(HistoryManagerActivity.this);
+                csvCreator.createCsvFile("trip",fieldList,lasttripData );
+                // TODO Auto-generated method stub
+            }
+        });
+    }
+
+    public void removeHistoryItems(final View view){
+        if (rideList.size() == 0 ){
+            Toast.makeText(HistoryManagerActivity.this, "Please, select one or more items", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(HistoryManagerActivity.this);
+        builder1.setMessage("Do you want to remove " + rideList.size() + " items");
+        builder1.setCancelable(true);
+
+        builder1.setPositiveButton(
+                "Yes",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                        try {
+                            for (int i = 0; i < rideList.size();i++){
+//                                routingRepo.delete(Integer.parseInt(rideList.get(i)));
+
+
+                            }
+                        }catch(Exception e){
+                            Log.i("ERROR",e.getMessage());
+                        }
+                        Toast.makeText(HistoryManagerActivity.this, rideList.size() + " items removed", Toast.LENGTH_SHORT).show();
+                        rideList = null;
+                        // reload list after remove
+                        openHistoryList(view);
+                    }
+                });
+
+        builder1.setNegativeButton(
+                "No",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                        return;
+                    }
+                });
+
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
+
     }
 
     public void openMap(View v,ArrayList rideData){

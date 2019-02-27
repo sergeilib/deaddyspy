@@ -33,6 +33,7 @@ public class RoutingRepo {
         values.put(Point.KEY_latitude, point.latitude);
         values.put(Point.KEY_place, point.place);
         values.put(Point.KEY_tripNum, point.trip_number);
+        values.put(Point.KEY_limit,point.limit);
 
 
         // Inserting Row
@@ -45,7 +46,7 @@ public class RoutingRepo {
 
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         // It's a good practice to use parameter ?, instead of concatenate string
-        db.delete(Point.TABLE, Point.KEY_ID + "= ?", new String[] { String.valueOf(location_Id) });
+        db.delete(Point.TABLE, Point.KEY_tripNum + "= ?", new String[] { String.valueOf(location_Id) });
         db.close(); // Closing database connection
     }
 

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history">история</string>
+    <string name="app_name">Deaddy  Spy</string>
+    <string name="settings">настройки</string>
+    <string name="app_scale">Единица измерения</string>
+    <string name="app_speed_record">ные на вашем устройстве</string>
+    <string name="history_button_last">Последняя поездка</string>
+    <string name="history_button_list">Список путешествий</string>
+    <string name="google_maps_key">AIzaSyColoGQ7stZsEVK5KbuFW_W8J6abjMZMvM</string>
+    <string name="title_activity_maps">map</string>
+    <string name="waiting_gps">В ожидании приема GPS</string>
+    <string name="language">язык</string>
+</resources>

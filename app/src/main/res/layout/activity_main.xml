@@ -28,7 +28,7 @@
         android:layout_alignStart="@+id/main_button_speedometr"
         android:layout_centerVertical="true"
         android:onClick="startSettingsManager"
-        android:text="Settings"
+        android:text="@string/settings"
         android:background="@drawable/switch_button_bg"
         tools:layout_editor_absoluteX="69dp"
         tools:layout_editor_absoluteY="388dp" />
@@ -42,7 +42,7 @@
         android:layout_marginBottom="68dp"
         android:background="@drawable/switch_button_bg"
         android:onClick="showHistory"
-        android:text="History" />
+        android:text="@string/history" />
 
      />
 </RelativeLayout>

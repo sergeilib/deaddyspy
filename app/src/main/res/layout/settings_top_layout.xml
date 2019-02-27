@@ -2,8 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
+    <Spinner
+        android:id="@+id/spinner_select_language"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
 
+        android:text="@string/language"
+         />
     <Switch
         android:id="@+id/speed_unit_switch"
         android:layout_width="match_parent"
@@ -19,6 +26,18 @@
 
     <Switch
         android:id="@+id/record_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:onClick="updateRecordParam"
+        android:text="@string/app_speed_record"
+        android:textOff="Mile/h"
+        android:textOn="km/h"
+        android:paddingLeft="10dp"
+        android:background="@drawable/switch_button_bg"
+        android:track="@drawable/switch_track_custom" />
+    <Switch
+        android:id="@+id/language_switch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:checked="false"

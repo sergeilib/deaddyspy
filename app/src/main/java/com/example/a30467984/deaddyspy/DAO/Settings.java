@@ -23,9 +23,10 @@ public class Settings {
     ContentValues stringContentValues = new ContentValues();
 
     public ContentValues getStringContentValues() {
-        stringContentValues.put("language","eng");
+        stringContentValues.put("language","english");
         stringContentValues.put("scale","km");
         stringContentValues.put("record","true");
+
         return stringContentValues;
     }
     public void setStringContentValues(String param,String value){

@@ -1,9 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Deaddy Spy</string>
-    <string name="app_scale">Speed unit</string>
-    <string name="app_speed_record">Record to DB</string>
-    <string name="history_button_last">Last ride</string>
-    <string name="history_button_list">History list</string>
+    <string name="app_scale">scale</string>
+    <string name="app_speed_record">record on device</string>
+    <string name="history_button_last">last ride</string>
+    <string name="history_button_list">history list</string>
     <string name="google_maps_key">AIzaSyColoGQ7stZsEVK5KbuFW_W8J6abjMZMvM </string>
-    <string name="title_activity_maps"></string>
+    <string name="title_activity_maps">map</string>
+    <string name="waiting_gps">Waiting for gps signal</string>
+    <string name="language">language</string>
+    <string name="history">history</string>
+    <string name="settings">settings</string>
 </resources>

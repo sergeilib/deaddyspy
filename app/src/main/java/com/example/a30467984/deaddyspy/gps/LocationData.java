@@ -16,6 +16,7 @@ import android.support.annotation.RequiresPermission;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,18 +51,27 @@ public class LocationData extends Activity implements LocationListener {
     HashMap settingsList;
     Activity activity;
 
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1;
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 5;
 
 
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 1;
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 3;
     protected LocationManager locationManager;
 
-    public LocationData(Context mContext, HashMap settingsList, Activity activity,int currentRideNum) {
+
+
+    protected OpenStreetMap openStreetMap;
+    public static String currentAddress;
+    public static Integer currentMaxSppeed;
+
+
+
+    public LocationData(Context mContext, HashMap settingsList, Activity activity, int currentRideNum) {
         this.mContext = mContext;
         this.settingsList = settingsList;
         this.activity = activity;
         this.counter = 1;
         this.currentRideNum = currentRideNum;
+        openStreetMap = new OpenStreetMap(mContext,activity);
         getLocation();
     }
 
@@ -86,6 +96,7 @@ public class LocationData extends Activity implements LocationListener {
 
                 // if GPS Enabled get lat/long using GPS Services
                 if (checkGPS) {
+
 
                     if (ActivityCompat.checkSelfPermission(mContext,
                             Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -119,6 +130,9 @@ public class LocationData extends Activity implements LocationListener {
                     }
 
 
+                }else{
+                    TextView textView_gps_signal = (TextView) activity.findViewById(R.id.no_gps_signal);
+                    textView_gps_signal.setVisibility(View.VISIBLE);
                 }
 
 
@@ -243,6 +257,12 @@ public class LocationData extends Activity implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
+        TextView textView_gps_signal = (TextView) activity.findViewById(R.id.no_gps_signal);
+        if (location.getProvider().equals(LocationManager.NETWORK_PROVIDER)){
+            textView_gps_signal.setVisibility(View.VISIBLE);
+        }else{
+            textView_gps_signal.setVisibility(View.INVISIBLE);
+        }
       //  setContentView(R.layout.activity_show_speedometer);
         Settings settings = new Settings();
         SettingsRepo settingsRepo = new SettingsRepo(this);
@@ -254,13 +274,20 @@ public class LocationData extends Activity implements LocationListener {
         point.longitude = location.getLongitude();
         point.trip_number = this.currentRideNum;
         point.date = routingRepo.getDateTime();
-
+        if (currentMaxSppeed != null) {
+            point.limit = currentMaxSppeed;
+        }
+        if (currentAddress != null) {
+            point.place = currentAddress;
+        }
+        openStreetMap.getOSMData(point.latitude,point.longitude);
         accuracy = this.getAccuracy();
 //        location.limit
         TextView textView_speed = (TextView) activity.findViewById(R.id.speed_number);
         // textView_speed.setText("" + point.speed);
         String pointParamsString = "Speed: " + point.speed + "\nLatitude: " + point.latitude + "\nLongitude: " + point.longitude +
-                "\nAccuracy: " + String.format("%.2f",accuracy) + "\n Counter: " + this.counter++;
+                "\nAccuracy: " + String.format("%.2f",accuracy) + "\n Counter: " + this.counter++ + "\n Limit: " + point.limit +
+                "\nRoad " + currentAddress;
         TextView tv_pointParams = (TextView) activity.findViewById(R.id.low_textView_location);
         tv_pointParams.setText(pointParamsString);
         Double visual_speed = point.speed;
