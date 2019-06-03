@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/switch_button_bg">
+
+    <TextView
+        android:id="@+id/dependency_title"
+        android:layout_width="0dp"
+        android:layout_height="39dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="@string/paired_device"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/alert_window_framelayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/dependencyButtonOK"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/save"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/app_depend_relativeLayout" />
+
+    <RelativeLayout
+        android:id="@+id/app_deppendancy_framelayout"
+        android:layout_width="0dp"
+        android:layout_height="150dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginStart="16dp"
+        android:theme="@style/AlertWindowBG"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dependency_title">
+
+        <ListView
+            android:id="@+id/ppaired_dependency_window_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:divider="@color/colorPrimaryDark"
+            android:dividerHeight="1dp"
+            android:listSelector="#0f0"
+            tools:layout_editor_absoluteX="202dp"
+            tools:layout_editor_absoluteY="114dp" />
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/dependency_cancel_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/dependencyButtonOK"
+        app:layout_constraintTop_toBottomOf="@+id/app_depend_relativeLayout" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/start_by_app"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/app_deppendancy_framelayout" />
+
+    <RelativeLayout
+        android:id="@+id/app_depend_relativeLayout"
+        android:layout_width="310dp"
+        android:layout_height="210dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginStart="16dp"
+        android:theme="@style/AlertWindowBG"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView3">
+
+
+
+            <GridView
+                android:id="@+id/app_deppend_greedview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:numColumns="4" />
+
+    </RelativeLayout>
+
+</android.support.constraint.ConstraintLayout>

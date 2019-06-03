@@ -26,7 +26,9 @@ public class Settings {
         stringContentValues.put("language","english");
         stringContentValues.put("scale","km");
         stringContentValues.put("record","true");
-
+        stringContentValues.put("paired_depend","");
+        stringContentValues.put("app_depend","");
+        stringContentValues.put("alert_activity","false");
         return stringContentValues;
     }
     public void setStringContentValues(String param,String value){

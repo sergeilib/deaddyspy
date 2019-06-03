@@ -23,6 +23,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,8 +33,10 @@ import java.util.regex.Pattern;
 
 public class OpenStreetMap   {
     //https://nominatim.openstreetmap.org/reverse?format=xml&lat=32.1853&lon=34.8279&zoom=20&addressdetails=1
-    static String URL_BASE = "https://nominatim.openstreetmap.org/reverse?format=json"; //&lat=32.1853&lon=34.8279';
-    static String URL_OVERPASS = "http://overpass-api.de/api/interpreter?data=way"; //197346870);out;"614552447
+    private static String URL_BASE = "https://nominatim.openstreetmap.org/reverse?format=json"; //&lat=32.1853&lon=34.8279';
+    private static String URL_OVERPASS = "http://overpass-api.de/api/interpreter?data=way"; //197346870);out;"614552447
+    private static HashSet currentAreaIdist;
+    private static String place_id;
     private Context context;
     private Activity activity;
 
@@ -99,9 +102,11 @@ public class OpenStreetMap   {
                     String sb = bufferedReader.readLine();
                     String jsonString = sb.toString();
                     String osm_id = null;
+                    String current_place_id = null;
                     try {
                         JSONObject jObj = new JSONObject(jsonString);
                         osm_id = jObj.getString("osm_id");
+                        current_place_id = jObj.getString("place_id");
                         resHashMap.put("address",jObj.getString("display_name"));
                         //System.out.println("JSON: " + osm_id);
                     }catch (JSONException e){
@@ -115,7 +120,14 @@ public class OpenStreetMap   {
                     //BEGIN SECOND HTTP REQUEST
                     ////////////////////////////////////////////////////////////////////
                     //URL url = new URL(URLEncoder.encode(urlString[0],"UTF-8"));
-              //      osm_id = "614552447";
+                    //osm_id = "614552447";
+ //                   osm_id = "404263910";
+                    if (current_place_id.equals(place_id)){
+                        // means no maxspeed changes
+                        return null;
+                    }else{
+                        place_id = current_place_id;
+                    }
                     String urlOPString = URL_OVERPASS + URLEncoder.encode("(" + osm_id +");out;");
                     try {
                         HttpURLConnection urlConnectionOP = null;
@@ -139,6 +151,13 @@ public class OpenStreetMap   {
                             //String jsonStringOP = sbOP.toString();
                             StringBuilder xml = new StringBuilder();
                             while ((sbOP = bufferedReaderOP.readLine()) != null ){
+                                if (sbOP.matches(".*<tag k=\"ref.*")){
+                                    Pattern pattern = Pattern.compile("v=\"(\\w+)\"");   // the pattern to search for
+                                    Matcher matcher = pattern.matcher(sbOP);
+                                    if (matcher.find()){
+                                        resHashMap.put("ref",matcher.group(1));
+                                    }
+                                }
                                 if (sbOP.matches(".*maxspeed.*")){
                                     Pattern pattern = Pattern.compile("\\d+");   // the pattern to search for
                                     Matcher matcher = pattern.matcher(sbOP);
@@ -146,7 +165,41 @@ public class OpenStreetMap   {
                                         resHashMap.put("maxspeed",matcher.group());
                                     }
                                 }
-
+                                if (sbOP.matches(".*k=\"highway.*")){
+                                    Pattern pattern = Pattern.compile("v=\"(.*?)\"");   // the pattern to search for
+                                    Matcher matcher = pattern.matcher(sbOP);
+                                    if (matcher.find()){
+                                        resHashMap.put("highway",matcher.group(1));
+                                    }
+                                }
+                                if (sbOP.matches(".*k=\"name:en.*")){
+                                    Pattern pattern = Pattern.compile("v=\"(.*?)\"");   // the pattern to search for
+                                    Matcher matcher = pattern.matcher(sbOP);
+                                    if (matcher.find()){
+                                        resHashMap.put("name:en",matcher.group(1));
+                                    }
+                                }
+                                if (sbOP.matches(".*k=\"name:he.*")){
+                                    Pattern pattern = Pattern.compile("v=\"(.*?)\"");   // the pattern to search for
+                                    Matcher matcher = pattern.matcher(sbOP);
+                                    if (matcher.find()){
+                                        resHashMap.put("name:he",matcher.group(1));
+                                    }
+                                }
+                                if (sbOP.matches(".*k=\"name:ru.*")){
+                                    Pattern pattern = Pattern.compile("v=\"(.*?)\"");   // the pattern to search for
+                                    Matcher matcher = pattern.matcher(sbOP);
+                                    if (matcher.find()){
+                                        resHashMap.put("name:ru",matcher.group(1));
+                                    }
+                                }
+                                if (sbOP.matches(".*k=\"oneway.*")){
+                                    Pattern pattern = Pattern.compile("v=\"(.*?)\"");   // the pattern to search for
+                                    Matcher matcher = pattern.matcher(sbOP);
+                                    if (matcher.find()){
+                                        resHashMap.put("oneway",matcher.group(1));
+                                    }
+                                }
                                 xml.append(sbOP);
                             }
 //                            try {
@@ -186,13 +239,29 @@ public class OpenStreetMap   {
             //tvData.setText(result);
            // TextView tv_pointParams = (TextView) activity.findViewById(R.id.low_textView_location);
             //((LocationData) Activity.getApplication()).setCurrentAddress(result.get("address"));
+            if (result != null) {
+                if (result.get("maxspeed") != null) {
+                    LocationData.currentMaxSppeed = Integer.parseInt(result.get("maxspeed").toString());
 
-            if (result.get("maxspeed") != null) {
-                LocationData.currentMaxSppeed = Integer.parseInt(result.get("maxspeed").toString());;
+                }
+                //LocationData.currentAddress = "" + result.get("address");
+                //LocationData.currentAddress = "" + (context.getString(R.string.road)) + result.get("ref") + "\n" +
+                //        result.get("name:en") + "\n" + result.get("name:he") + "\n" + result.get("name:ru");
+                if (result.get("ref") != null) {
+                    LocationData.currentLocation.put("road", result.get("ref").toString());
+                }
+                if(result.get("name:en") != null){
+                    LocationData.currentLocation.put("name:en", result.get("name:en").toString());
+                }
+                if(result.get("name:he") != null){
+                    LocationData.currentLocation.put("name:he", result.get("name:he").toString());
+                }
+                if(result.get("name:ru") != null){
+                    LocationData.currentLocation.put("name:ru", result.get("name:ru").toString());
+                }
+                //tv_pointParams.append("\nLlimit: " + result.get("maxspeed"));
+                //tv_pointParams.append("\nAddress: " + result.get("address"));
             }
-            LocationData.currentAddress = "" + result.get("address");
-            //tv_pointParams.append("\nLlimit: " + result.get("maxspeed"));
-            //tv_pointParams.append("\nAddress: " + result.get("address"));
         }
     }
 }

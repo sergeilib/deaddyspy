@@ -7,6 +7,8 @@
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
 
     <application
         android:allowBackup="true"
@@ -29,6 +31,7 @@
         <activity android:name=".ShowSpeedometer"></activity>
         <activity android:name=".SettingsManagerActivity"></activity>
         <activity android:name=".HistoryManagerActivity"></activity>
+
         <activity android:name=".MapsActivity"
             android:label="@string/title_activity_maps">
             <intent-filter>
@@ -36,6 +39,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".AlertManagerActivity"></activity>
     </application>
 
 </manifest>

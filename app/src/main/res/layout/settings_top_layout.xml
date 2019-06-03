@@ -1,51 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
+
     <Spinner
         android:id="@+id/spinner_select_language"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/spinner_bg"
+        android:paddingLeft="10dp"
+        android:text="@string/language" />
 
-        android:text="@string/language"
-         />
     <Switch
         android:id="@+id/speed_unit_switch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/switch_button_bg"
         android:checked="true"
         android:onClick="updateScaleParam"
-        android:text="@string/app_scale"
         android:paddingLeft="10dp"
+        android:text="@string/app_scale"
         android:textOff="Mile/h"
         android:textOn="km/h"
-        android:background="@drawable/switch_button_bg"
         android:track="@drawable/switch_track_custom" />
 
     <Switch
         android:id="@+id/record_switch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/switch_button_bg"
         android:checked="false"
         android:onClick="updateRecordParam"
+        android:paddingLeft="10dp"
         android:text="@string/app_speed_record"
         android:textOff="Mile/h"
         android:textOn="km/h"
-        android:paddingLeft="10dp"
-        android:background="@drawable/switch_button_bg"
         android:track="@drawable/switch_track_custom" />
+
     <Switch
         android:id="@+id/language_switch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/switch_button_bg"
         android:checked="false"
         android:onClick="updateRecordParam"
+        android:paddingLeft="10dp"
         android:text="@string/app_speed_record"
         android:textOff="Mile/h"
         android:textOn="km/h"
-        android:paddingLeft="10dp"
-        android:background="@drawable/switch_button_bg"
         android:track="@drawable/switch_track_custom" />
+
+    <Button
+        android:id="@+id/config_ntification_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/switch_button_bg"
+        android:gravity="left|center_vertical"
+        android:paddingLeft="10dp"
+        android:fontFamily="@string/common_signin_button_text_long"
+        android:text="@string/alert_conf"
+        android:textAllCaps="false"
+        android:textSize="14sp"
+        android:onClick="openAlertActivity"/>
+
+    <Button
+        android:id="@+id/config_dependency_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/switch_button_bg"
+        android:gravity="left|center_vertical"
+        android:paddingLeft="10dp"
+        android:fontFamily="@string/common_signin_button_text_long"
+        android:text="@string/dependency"
+        android:textAllCaps="false"
+        android:textSize="14sp"
+        android:onClick="openDependencyActivity"/>
 </LinearLayout>

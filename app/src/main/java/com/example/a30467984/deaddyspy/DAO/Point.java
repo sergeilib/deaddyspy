@@ -1,5 +1,7 @@
 package com.example.a30467984.deaddyspy.DAO;
 
+import android.text.method.DateTimeKeyListener;
+
 /**
  * Created by 30467984 on 7/22/2018.
  */
@@ -20,7 +22,7 @@ public class Point {
     public int place_ID;
     public Double latitude;
     public Double longitude;
-    public Double speed;
+    public int speed;
     public int limit;
     public String date;
     public String place;

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/switch_button_bg">
+
+    <TextView
+        android:id="@+id/alert_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="144dp"
+        android:layout_marginStart="144dp"
+        android:layout_marginTop="12dp"
+        android:text="@string/alert_conf"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/alert_window_framelayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RelativeLayout
+        android:id="@+id/alert_window_framelayout"
+        android:layout_width="253dp"
+        android:layout_height="244dp"
+        android:layout_marginBottom="48dp"
+        android:layout_marginEnd="115dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="72dp"
+        android:theme="@style/AlertWindowBG"
+        app:layout_constraintBottom_toTopOf="@+id/app_deppendancy_framelayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/alert_title"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.78">
+
+        <TextView
+            android:id="@+id/dependency_list_window_title"
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:layout_marginTop="2dp"
+            android:background="@drawable/generic_bg"
+            android:gravity="center"
+            android:text="@string/alert_list"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="167dp"
+            tools:layout_editor_absoluteY="8dp" />
+
+        <ListView
+            android:id="@+id/alerts_window_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/dependency_list_window_title"
+            android:divider="@color/colorPrimaryDark"
+            android:dividerHeight="1dp"
+            android:listSelector="#0f0" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/app_deppendancy_framelayout"
+        android:layout_width="0dp"
+        android:layout_height="178dp"
+        android:layout_marginBottom="45dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="45dp"
+        android:theme="@style/AlertWindowBG"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/alert_window_framelayout">
+
+        <TextView
+            android:id="@+id/alert_window_details"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true" />
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/alert_add_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:onClick="addNewAlert"
+        android:text="@string/add"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/alert_window_framelayout"
+        app:layout_constraintTop_toTopOf="@+id/alert_window_framelayout" />
+
+    <Button
+        android:id="@+id/alert_remove_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:onClick="removeAlert"
+        android:text="@string/remove"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/alert_window_framelayout"
+        app:layout_constraintTop_toBottomOf="@+id/alert_add_button" />
+
+    <Button
+        android:id="@+id/alert__edit_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:onClick="editAlert"
+        android:text="@string/edit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/alert_window_framelayout"
+        app:layout_constraintTop_toBottomOf="@+id/alert_remove_button" />
+
+    <TextView
+        android:id="@+id/textViewDetailsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="261dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/details"
+        app:layout_constraintBottom_toTopOf="@+id/app_deppendancy_framelayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/alert_window_framelayout" />
+</android.support.constraint.ConstraintLayout>

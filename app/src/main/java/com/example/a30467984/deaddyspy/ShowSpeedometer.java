@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.widget.TextView;
 
 import com.example.a30467984.deaddyspy.DAO.DatabaseHelper;
@@ -39,7 +40,7 @@ public class ShowSpeedometer extends AppCompatActivity {
 //        location.limit
         TextView textView_speed = (TextView) findViewById(R.id.speed_number);
 
-        Double visual_speed = point.speed;
+        int visual_speed = point.speed;
 
         if (settingsList.isEmpty() != true){
             /// if record params is checked , insert current point to DB
@@ -54,13 +55,22 @@ public class ShowSpeedometer extends AppCompatActivity {
 
                 unit = ((HashMap<String,String>)settingsList.get("scale")).get("value");
                 if (unit.equals("miles")){
-                    visual_speed = point.speed * 1.6;
+                    visual_speed = (int) (point.speed * 1.6);
                 }
             }
             TextView tv_unit = (TextView) findViewById(R.id.speed_unit);
             tv_unit.setText(unit);
         }
         //// DISPLAY SPEED
-        textView_speed.setText("" + visual_speed.intValue());
+        textView_speed.setText("" + visual_speed);
+    }
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if ((keyCode == KeyEvent.KEYCODE_BACK))
+        {
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

@@ -128,7 +128,7 @@ public class RoutingRepo {
                 location.place_ID =cursor.getInt(cursor.getColumnIndex(Point.KEY_ID));
                 location.place =cursor.getString(cursor.getColumnIndex(Point.KEY_place));
                 location.date  =cursor.getString(cursor.getColumnIndex(Point.KEY_date));
-                location.speed =cursor.getDouble(cursor.getColumnIndex(Point.KEY_speed));
+                location.speed =cursor.getInt(cursor.getColumnIndex(Point.KEY_speed));
                 location.limit =cursor.getInt(cursor.getColumnIndex(Point.KEY_limit));
                 location.latitude =cursor.getDouble(cursor.getColumnIndex(Point.KEY_latitude));
                 location.latitude =cursor.getDouble(cursor.getColumnIndex(Point.KEY_longitude));
@@ -250,9 +250,15 @@ public class RoutingRepo {
     }
 
     public String getDateTime() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(
-                "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        Date date = new Date();
-        return dateFormat.format(date);
+        try {
+
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat(
+                    "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            Date date = new Date();
+            return dateFormat.format(date);
+        }catch (Exception e){
+            return null;
+        }
     }
 }

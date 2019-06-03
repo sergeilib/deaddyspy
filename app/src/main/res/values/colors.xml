@@ -13,4 +13,5 @@
     <color name="tableBackground">#90caf9</color>
     <color name="gps_alert">#ffd600</color>
     <color name="alert_green">#228B22</color>
+    <color name="color_white">#ffffff</color>
 </resources>
