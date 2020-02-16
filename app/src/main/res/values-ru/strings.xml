@@ -37,4 +37,7 @@
     <string name="dependency">зависимость запуска</string>
     <string name="alertTitle">предупреждение</string>
     <string name="save">сохранить</string>
+    <string name="start_by_app">установленные приложения</string>
+    <string name="paired_device">сопряженные устройства</string>
+    <string name="groups">группы</string>
 </resources>

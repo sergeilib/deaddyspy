@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:configChanges="keyboardHidden|orientation"
     android:background="@drawable/switch_button_bg">
 
     <TextView
@@ -105,7 +106,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:numColumns="4" />
+                android:numColumns="4"
+                android:scrollbarAlwaysDrawVerticalTrack="true"
+                android:scrollbars="vertical"/>
 
     </RelativeLayout>
 

@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout
+    android:id="@+id/daddy_spy_first_framelayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.a30467984.deaddyspy.MainActivity">
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/daddy_spy_first_constraint_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        tools:context="com.example.a30467984.deaddyspy.MainActivity">
 
 
     <Button
@@ -14,11 +24,13 @@
         android:layout_alignLeft="@+id/main_button_history"
         android:layout_alignParentTop="true"
         android:layout_alignStart="@+id/main_button_history"
-        android:layout_marginTop="88dp"
-        android:onClick="startSpeedometer"
+        android:layout_marginTop="50dp"
         android:background="@drawable/switch_button_bg"
+        android:onClick="startSpeedometer"
         android:text="GPS"
-        tools:layout_editor_absoluteX="57dp" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/main_button_settings"
@@ -27,22 +39,58 @@
         android:layout_alignLeft="@+id/main_button_speedometr"
         android:layout_alignStart="@+id/main_button_speedometr"
         android:layout_centerVertical="true"
+        android:layout_marginTop="56dp"
+        android:background="@drawable/switch_button_bg"
         android:onClick="startSettingsManager"
         android:text="@string/settings"
-        android:background="@drawable/switch_button_bg"
-        tools:layout_editor_absoluteX="69dp"
-        tools:layout_editor_absoluteY="388dp" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/main_button_group" />
 
     <Button
         android:id="@+id/main_button_history"
         android:layout_width="270dp"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="56dp"
+        android:background="@drawable/switch_button_bg"
+        android:onClick="showHistory"
+        android:text="@string/history"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/main_button_speedometr" />
+
+     />
+
+    <Button
+        android:id="@+id/main_button_group"
+        android:layout_width="270dp"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="68dp"
+        android:layout_marginTop="56dp"
         android:background="@drawable/switch_button_bg"
-        android:onClick="showHistory"
-        android:text="@string/history" />
 
-     />
-</RelativeLayout>
+        android:text="@string/groups"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/main_button_history" />
+
+</android.support.constraint.ConstraintLayout>
+    <FrameLayout
+        android:id="@+id/text_frame_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center">
+    <TextView
+        android:id="@+id/first_layout_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="DADDY SPY"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="50dp"
+        android:visibility="visible" />
+    </FrameLayout>
+</FrameLayout>

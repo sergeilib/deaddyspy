@@ -4,7 +4,9 @@ import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.res.Configuration;
@@ -252,6 +254,9 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
         }
             final Dialog dialog = new Dialog(context);
             dialog.setContentView(R.layout.dependency_configuration);
+            //// in order dialog will not disapear in rotation , make orientation as portrait
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            /////////////////////////////////////////////////////////////////////
             ListView pairedlistView = (ListView)dialog.findViewById(R.id.ppaired_dependency_window_list);
             //GridView appDependListView = (GridView)dialog.findViewById(R.id.app_deppend_greedview);
             //dialog.setTitle("Title...");
@@ -362,7 +367,8 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
         dependDialogButtonCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                /// AFTER CLOSE DIALOG RETURN TO REGULAR ORIENTATION
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
                 dialog.dismiss();
             }
         });
@@ -371,6 +377,10 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
         dialog.show();
 
     }
+
+//    @Override
+//    public void onShow(DialogInterface dialog) {
+//    }
 
     private List<AppList> getInstalledApps() {
         List<AppList> res = new ArrayList<AppList>();

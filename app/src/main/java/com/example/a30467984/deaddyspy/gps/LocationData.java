@@ -296,21 +296,21 @@ public class LocationData extends Activity implements LocationListener {
             /////////////////////////////////////
             ////////////////////////////////////////
             /// UNMARK AFTER TEST
-//            if (currentMaxSppeed > 0) {
-//                point.limit = currentMaxSppeed;
-//                if (point.speed > currentMaxSppeed) {
-//                    try {
-//                        alertTools.checkCurrentSpeed(point.speed, currentMaxSppeed);
-//                    }catch (Exception e){
-//                        Toast.makeText(mContext, "Failed to checkk llimit", Toast.LENGTH_SHORT).show();
-//                    }
-//                }else{
-//                    if (lastState.equals("bad")){
-//                        alertTools.setFrameColor(R.drawable.sppeed_aert_border);
-//                    }
-//                    lastState = "good";
-//                }
-//            }
+            if (currentMaxSppeed > 0) {
+                point.limit = currentMaxSppeed;
+                if (point.speed > currentMaxSppeed) {
+                    try {
+                        alertTools.checkCurrentSpeed(point.speed, currentMaxSppeed);
+                    }catch (Exception e){
+                        Toast.makeText(mContext, "Failed to checkk llimit", Toast.LENGTH_SHORT).show();
+                    }
+                }else{
+                    if (lastState.equals("bad")){
+                        alertTools.setFrameColor(R.drawable.sppeed_aert_border);
+                    }
+                    lastState = "good";
+                }
+            }
             //////////////////////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////
@@ -321,7 +321,7 @@ public class LocationData extends Activity implements LocationListener {
             openStreetMap.getOSMData(point.latitude, point.longitude);
             accuracy = this.getAccuracy();
 //        location.limit
-            Toast.makeText(mContext, "2", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(mContext, "2", Toast.LENGTH_SHORT).show();
             TextView textView_speed = (TextView) activity.findViewById(R.id.speed_number);
             // textView_speed.setText("" + point.speed);
             String pointParamsString = "Speed: " + point.speed + "\nLatitude: " + point.latitude + "\nLongitude: " + point.longitude +
@@ -329,14 +329,14 @@ public class LocationData extends Activity implements LocationListener {
                     "\n Limit: " + point.limit + "\n";
             Toast.makeText(mContext, "2.5", Toast.LENGTH_SHORT).show();
             if(currentLocation != null && currentLocation.size() > 0) {
-                Toast.makeText(mContext, "2.6", Toast.LENGTH_SHORT).show();
+            //    Toast.makeText(mContext, "2.6", Toast.LENGTH_SHORT).show();
                 if (currentLocation.get("road") != null) {
-                   // pointParamsString = pointParamsString + getString(R.string.road) + ": " + currentLocation.get("road").toString();
+                   pointParamsString = pointParamsString + mContext.getString(R.string.road) + ": " + currentLocation.get("road").toString();
                    point.place = mContext.getString(R.string.road) + ": " + currentLocation.get("road").toString() +"\n";
                 }
                 ///////////////////////////////////////////////
                 ////// check what language is defined
-                Toast.makeText(mContext, "2.7", Toast.LENGTH_SHORT).show();
+             //   Toast.makeText(mContext, "2.7", Toast.LENGTH_SHORT).show();
                 if (settingsList.get("language") != null) {
                     if (currentLocation.get("name:" + settingsList.get("language")) != null) {
                         pointParamsString = pointParamsString + "name: " +
@@ -347,15 +347,15 @@ public class LocationData extends Activity implements LocationListener {
                                 currentLocation.get("name:en");
                         point.place = point.place + currentLocation.get("name:en");
                     }
-                    Toast.makeText(mContext, "2.8", Toast.LENGTH_SHORT).show();
+                 //   Toast.makeText(mContext, "2.8", Toast.LENGTH_SHORT).show();
                 }else{
-                    Toast.makeText(mContext, "2.9", Toast.LENGTH_SHORT).show();
+                 //   Toast.makeText(mContext, "2.9", Toast.LENGTH_SHORT).show();
                     pointParamsString = pointParamsString  + "name: " +
                             currentLocation.get("name:en");
                     point.place = point.place + currentLocation.get("name:en");
                 }
             }
-            Toast.makeText(mContext, "3", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(mContext, "3", Toast.LENGTH_SHORT).show();
             TextView tv_pointParams = (TextView) activity.findViewById(R.id.low_textView_location);
             tv_pointParams.setText(pointParamsString);
             int visual_speed = point.speed;

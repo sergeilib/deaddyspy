@@ -37,4 +37,7 @@
     <string name="dependency">תלות הפעלה</string>
     <string name="save">שמור</string>
     <string name="alertTitle">התראה</string>
+    <string name="start_by_app">יישומים מותקנים</string>
+    <string name="paired_device">התקנים מסונכרנים</string>
+    <string name="groups">קבוצות</string>
 </resources>

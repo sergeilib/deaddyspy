@@ -1,6 +1,7 @@
 package com.example.a30467984.deaddyspy;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -73,4 +74,6 @@ public class ShowSpeedometer extends AppCompatActivity {
         }
         return super.onKeyDown(keyCode, event);
     }
+
+    
 }
