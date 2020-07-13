@@ -61,7 +61,9 @@ public class MainActivity extends AppCompatActivity {
     String responseText;
     private String path = "https://li780-236.members.linode.com:443/api/auth/";
     private static String uniqueID = null;
+    private static final String PREF_MY_DADDY = "PREF_MY_DADDY";
     private static final String PREF_UNIQUE_ID = "PREF_UNIQUE_ID";
+    private static final String AUTH_TKN = "AUTH_TKN";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,17 +81,17 @@ public class MainActivity extends AppCompatActivity {
         }*/
 //        String uuid = getAppUUID();
         String androidID = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-        appServerInit();
+
         //SingleToneAuthToen singleToneAuthToen = SingleToneAuthToen.getInstance();
         // singleToneAuthToen.setToken();
-        try {
-            TimeUnit.SECONDS.sleep(5);
-        } catch (InterruptedException e) {
-
-        }
+//        try {
+//            TimeUnit.SECONDS.sleep(5);
+//        } catch (InterruptedException e) {
+//
+//        }
         findViewById(R.id.text_frame_layout).setVisibility(View.INVISIBLE);
         findViewById(R.id.daddy_spy_first_constraint_layout).setVisibility(View.VISIBLE);
-
+        appServerInit();
     }
 
     public void startSpeedometer(View view) {
@@ -110,6 +112,13 @@ public class MainActivity extends AppCompatActivity {
     /// Open
     public void showHistory(View view) {
         Intent i = new Intent(this, HistoryManagerActivity.class);
+
+        // Starts TargetActivity
+        startActivity(i);
+    }
+
+    public void startGroupsActivity(View view){
+        Intent i = new Intent(this, GroupsManagerActivity.class);
 
         // Starts TargetActivity
         startActivity(i);
@@ -178,7 +187,9 @@ public class MainActivity extends AppCompatActivity {
 
         getUniqId(getBaseContext());
         SingleToneAuthToen singleToneAuthToen = SingleToneAuthToen.getInstance();
+
         //singleToneAuthToen.setToken();
+        connectionInit();
     }
 
     private String serverToken() {
@@ -186,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
         return singleToneAuthToen.getToken();
     }
 
-    class GetServerData extends AsyncTask<Object,String,Object> {
+    /*class GetServerData extends AsyncTask<Object,String,Object> {
 
         @Override
         protected void onPreExecute() {
@@ -232,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
 //                    Toast.makeText(getApplicationContext(),"You Selected "+countries.get(position).getCountryName()+ " as Country",Toast.LENGTH_SHORT).show();        }
 //            });
         }
-    }
+    }*/
 
     protected Void getWebServiceResponseData() {
 
@@ -350,10 +361,11 @@ public class MainActivity extends AppCompatActivity {
     public synchronized  String getUniqId(Context context) {
         if (uniqueID == null) {
             SharedPreferences sharedPrefs = context.getSharedPreferences(
-                    PREF_UNIQUE_ID, Context.MODE_PRIVATE);
+                    PREF_MY_DADDY, Context.MODE_PRIVATE);
             uniqueID = sharedPrefs.getString(PREF_UNIQUE_ID, null);
-            firstTimeInit(uniqueID);
-            if (uniqueID == null) {
+            String tkn = sharedPrefs.getString(AUTH_TKN,null);
+            //firstTimeInit(uniqueID);
+            if (uniqueID == null || tkn == null) {
                 uniqueID = UUID.randomUUID().toString();
                 SharedPreferences.Editor editor = sharedPrefs.edit();
                 editor.putString(PREF_UNIQUE_ID, uniqueID);
@@ -365,6 +377,11 @@ public class MainActivity extends AppCompatActivity {
         return uniqueID;
     }
 
+
+    /////////////////////////////////////////////////////////////////////////
+    //// this method invoked in first time application running
+    //// pass android_id and uuid to register on server
+    //////////////////////////////////////////////////////////////////////////
     private void firstTimeInit(String uuid){
         try {
             Object[] object = new Object[2];
@@ -376,12 +393,52 @@ public class MainActivity extends AppCompatActivity {
             //params.put("method","POST");
             params.put("android_id",android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID));
             params.put("uuid",uniqueID);
+            params.put("method","POST");
             object[1] = params;
             JSONObject jsonObject = new JSONObject(params);
            // RequestHandler requestHandler = new RequestHandler();
             //requestHandler.sendPost(url,jsonObject);
             ServerConnection serverConnection = new ServerConnection(getBaseContext(),activity);
-            serverConnection.getRequest(object,"POST");
+            serverConnection.getInitRequest(object);
+            Log.i("INFO","Async status" );
+        }catch (Exception e){
+            Log.i("INFO", e.getMessage());
+        }
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    ////// this method called every time  we try to connect to server to get token
+    ////// for establish session
+    /////////////////////////////////////////////////////////////////////////////
+
+    private void connectionInit(){
+        try {
+            Object[] object = new Object[2];
+            URL url = new URL(path + "get_tmp_tkn");
+            object[0] = url;
+
+            HashMap<String,String> params = new HashMap<>();
+            //params.put("url",path + "first_register");
+            //params.put("method","POST");
+            SharedPreferences sharedPrefs = getBaseContext().getSharedPreferences(
+                    PREF_MY_DADDY, Context.MODE_PRIVATE);
+
+            String tkn = sharedPrefs.getString(AUTH_TKN,null);
+            params.put("android_id",android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID));
+            //params.put("uuid",uniqueID);
+            if (tkn != null) {
+                params.put("token", tkn);
+                params.put("method", "POST");
+                object[1] = params;
+                JSONObject jsonObject = new JSONObject(params);
+                // RequestHandler requestHandler = new RequestHandler();
+                //requestHandler.sendPost(url,jsonObject);
+                ServerConnection serverConnection = new ServerConnection(getBaseContext(), activity);
+                serverConnection.getAuthRequest(object);
+            }else{
+                Toast.makeText(getApplicationContext(),"Can't establish connection with server",Toast.LENGTH_SHORT).show();
+            }
+
         }catch (Exception e){
             Log.i("INFO", e.getMessage());
         }

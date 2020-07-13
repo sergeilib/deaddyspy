@@ -9,6 +9,9 @@ package com.example.a30467984.deaddyspy.utils;
         import android.app.Activity;
         import android.content.Context;
         import android.content.res.AssetManager;
+        import android.preference.SwitchPreference;
+        import android.util.Log;
+        import android.widget.Switch;
 
         import org.json.JSONObject;
 
@@ -43,6 +46,20 @@ public class RequestHandler {
     public RequestHandler(Context context,Activity activity){
         this.context = context;
         this.activity = activity;
+    }
+
+    public String sendMethod(URL url , JSONObject postDataParams , String method) throws Exception{
+        String response = "";
+        switch(method){
+            case "POST":
+                response = this.sendPost(url, postDataParams);
+                break;
+            case "GET":
+                response = this.sendGet(url, postDataParams);
+                break;
+        }
+
+        return response;
     }
 
     public String sendPost(URL url , JSONObject postDataParams) throws Exception {
@@ -106,7 +123,7 @@ public class RequestHandler {
         os.close();
 
         int responseCode=conn.getResponseCode(); // To Check for 200
-
+        String postResponse = null;
         if (responseCode == HttpsURLConnection.HTTP_OK) {
 
             BufferedReader in=new BufferedReader( new InputStreamReader(conn.getInputStream()));
@@ -117,29 +134,89 @@ public class RequestHandler {
                 break;
             }
             in.close();
-            return sb.toString();
-        }
-        return null;
-    }
-    public static String sendGet(String url) throws IOException {
-        URL obj = new URL(url);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-        con.setRequestMethod("GET");
-        int responseCode = con.getResponseCode();
-        System.out.println("Response Code :: " + responseCode);
-        if (responseCode == HttpURLConnection.HTTP_OK) { // connection ok
-            BufferedReader in = new BufferedReader(new InputStreamReader( con.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
+            postResponse = String.valueOf(sb);
 
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
+        }
+        return postResponse;
+
+    }
+    public String sendGet(URL url, JSONObject postDataParams) throws Exception {
+
+        AssetManager assetManager =  context.getAssets();
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+// From https://www.washington.edu/itconnect/security/ca/load-der.crt
+        //InputStream caInput = new BufferedInputStream(new FileInputStream("COMODORSADomainValidationSecureServerCA.crt"));
+        Certificate ca;
+        //try {
+        // ca = cf.generateCertificate(assetManager.open("COMODORSADomainValidationSecureServerCA.crt"));
+        //ca = cf.generateCertificate(assetManager.open("isrgrootx1.pem"));
+        ca=cf.generateCertificate(assetManager.open("cert.pem"));
+        System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
+        //} finally {
+        //    caInput.close();
+        //}
+
+// Create a KeyStore containing our trusted CAs
+        String keyStoreType = KeyStore.getDefaultType();
+        KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+        keyStore.load(null, null);
+        keyStore.setCertificateEntry("ca", ca);
+
+// Create a TrustManager that trusts the CAs in our KeyStore
+        String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+        tmf.init(keyStore);
+
+// Create an SSLContext that uses our TrustManager
+        SSLContext context = SSLContext.getInstance("TLS");
+        context.init(null, tmf.getTrustManagers(), null);
+
+        HostnameVerifier hostnameVerifier = new HostnameVerifier() {
+            @Override
+            public boolean verify(String hostname, SSLSession session) {
+                HostnameVerifier hv = HttpsURLConnection.getDefaultHostnameVerifier();
+                return hv.verify("li780-236.members.linode.com",session);
+            }
+        };
+
+        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+        conn.setSSLSocketFactory(context.getSocketFactory());
+        conn.setHostnameVerifier(hostnameVerifier);
+        conn.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:25.0) Gecko/20100101 Firefox/25.0");
+        conn.addRequestProperty("x-access-token",postDataParams.get("token").toString());
+        conn.setReadTimeout(20000);
+        conn.setConnectTimeout(20000);
+        conn.setRequestMethod("GET");
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+//        conn.connect();
+        OutputStream os = conn.getOutputStream();
+        BufferedWriter writer = new BufferedWriter( new OutputStreamWriter(os, "UTF-8"));
+       // writer.write(encodeParams(postDataParams));
+        writer.write("{\"android_id\":\"13793fd1780accf6\"}" );
+        writer.flush();
+        writer.close();
+        os.close();
+
+        int responseCode=conn.getResponseCode(); // To Check for 200
+        String postResponse = null;
+        if (responseCode == HttpsURLConnection.HTTP_OK) {
+
+            BufferedReader in=new BufferedReader( new InputStreamReader(conn.getInputStream()));
+            StringBuffer sb = new StringBuffer("");
+            String line="";
+            while((line = in.readLine()) != null) {
+                sb.append(line);
+                break;
             }
             in.close();
-            return response.toString();
-        } else {
-            return "";
+            postResponse = String.valueOf(sb);
+
+        }else{
+            Log.i("ERROR",conn.getContent().toString());
         }
+        return postResponse;
+
     }
     private static String encodeParams(JSONObject params) throws Exception {
         StringBuilder result = new StringBuilder();

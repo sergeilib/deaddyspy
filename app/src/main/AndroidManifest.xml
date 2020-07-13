@@ -33,7 +33,7 @@
         <activity android:name=".ShowSpeedometer"></activity>
         <activity android:name=".SettingsManagerActivity"></activity>
         <activity android:name=".HistoryManagerActivity"></activity>
-
+        <activity android:name=".GroupsManagerActivity"></activity>
         <activity android:name=".MapsActivity"
             android:label="@string/title_activity_maps">
             <intent-filter>
