@@ -8,15 +8,15 @@ public class Group {
     public static final String KEY_name = "name";
 
     // property help us to keep data
-    public int alert_ID;
+    public int group_ID;
     public String name;
 
-    public int getAlert_ID() {
-        return alert_ID;
+    public int getGroup_ID() {
+        return group_ID;
     }
 
-    public void setAlert_ID(int alert_ID) {
-        this.alert_ID = alert_ID;
+    public void setGroup_ID(int alert_ID) {
+        this.group_ID = alert_ID;
     }
 
     public String getName() {

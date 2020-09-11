@@ -6,7 +6,9 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.telecom.Call;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -33,6 +35,7 @@ import com.example.a30467984.deaddyspy.DAO.Settings;
 import com.example.a30467984.deaddyspy.DAO.SettingsRepo;
 import com.example.a30467984.deaddyspy.gps.LocationData;
 import com.example.a30467984.deaddyspy.modules.AlertDetails;
+import com.example.a30467984.deaddyspy.modules.GroupDetails;
 import com.example.a30467984.deaddyspy.modules.NotificationDetails;
 
 import java.util.ArrayList;
@@ -85,12 +88,12 @@ public class GroupsManagerActivity extends AppCompatActivity {
         }
     }
 
-    public void addNewAlert(View view){
-        buildAlertDialog();
+    public void addNewGroup(View view){
+        buildGroupDialog();
     }
 
 
-    public void removeAlert(View view){
+    public void removeGroup(View view){
         if(selectedGroupName != null){
             AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
             builder1.setMessage("Do you want to remove " + selectedGroupName + " alert");
@@ -107,7 +110,7 @@ public class GroupsManagerActivity extends AppCompatActivity {
                                 Log.i("ERROR",e.getMessage());
                             }
                             Toast.makeText(GroupsManagerActivity.this, selectedGroupName + " alert removed", Toast.LENGTH_SHORT).show();
-                            getAlertList();
+                           // getAlertList();
                             displayGroupsList();
                         }
                     });
@@ -128,12 +131,12 @@ public class GroupsManagerActivity extends AppCompatActivity {
         }
     }
 
-    public void editAlert(View view){
+    public void editGroup(View view){
         if(selectedGroupName.equals("")){
             displayGroupDialogOK("Please  select alert");
         }else {
             editGroupDetails = fetchGroupDetails(selectedGroupName;
-            buildAlertDialog();
+            buildGroupDialog();
             editGroupDetails = null;
         }
     }
@@ -160,18 +163,18 @@ public class GroupsManagerActivity extends AppCompatActivity {
                 final String item = (String) parent.getItemAtPosition(position);
                 selectedGroupName = item;
                 Toast.makeText(context, item + "", Toast.LENGTH_SHORT).show();
-                AlertDetails alertDetails = fetchGroupDetails(item);
+                GroupDetails groupDetails = fetchGroupDetails(item);
                 //         Map curentAlertParams = alertRepo.getAlertParamsByName(item);
-                displayGroupDetails(alertDetails);
+                //displayGroupDetails(groupsDetails);
             }
         });
     }
 
-    public AlertDetails fetchGroupDetails(String alertName){
+    public GroupDetails fetchGroupDetails(String groupName){
         Map curentAlertParams = groupRepo.getGroupParamsByName(groupName);
         AlertDetails alertDetails = new AlertDetails();
         NotificationDetails notificationDetails = new NotificationDetails();
-        alertDetails.setAlertName(alertName);
+        alertDetails.setAlertName(groupName );
         if(curentAlertParams.size() > 0){
             Iterator<String> keySetIterator = curentAlertParams.keySet().iterator();
             while (keySetIterator.hasNext()) {
@@ -204,12 +207,12 @@ public class GroupsManagerActivity extends AppCompatActivity {
                 alertDetails.setNotificationDetails(notificationDetails);
             }
         }
-        return alertDetails;
+        return groupsDetails;
     }
 
-    public void buildAlertDialog(){
+    public void buildGroupDialog(){
         final Dialog dialog = new Dialog(context);
-        dialog.setContentView(R.layout.new_alert_dialoog);
+        dialog.setContentView(R.layout.new_group_dialoog);
 
         //dialog.setTitle("Title...");
 
@@ -219,7 +222,7 @@ public class GroupsManagerActivity extends AppCompatActivity {
 
         dialog.show();
         final SeekBar seekBar = (SeekBar) dialog.findViewById(R.id.seekBarThreshold);
-        final EditText groupName = (EditText) dialog.findViewById(R.id.editTextGroupName);
+        final EditText groupName = (EditText) dialog.findViewById(R.id.new_group_name_input);
         groupName.addTextChangedListener(new TextWatcher() {
 
             // the user's changes are saved here
@@ -238,79 +241,12 @@ public class GroupsManagerActivity extends AppCompatActivity {
 
             }
         });
-        final EditText thresholdET = (EditText) dialog.findViewById(R.id.editTextAlert);
-        thresholdET.addTextChangedListener(new TextWatcher() {
 
-            // the user's changes are saved here
-            public void onTextChanged(CharSequence c, int start, int before, int count) {
-                // mCrime.setTitle(c.toString());
-
-            }
-
-            public void beforeTextChanged(CharSequence c, int start, int count, int after) {
-                // this space intentionally left blank
-            }
-
-            public void afterTextChanged(Editable c) {
-                // this one too
-                if(!c.toString().equals("")) {
-                    seekBar.setProgress(Integer.parseInt(thresholdET.getText().toString()));
-                }else{
-                    seekBar.setProgress(0);
-                }
-            }
-        });
         ///////////////////////////////////////////////////////////////////////
         //// Listener of SEEKKBAR OF ALERT THRESHOLD
         ///////////////////////////////////////////////
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                //Toast.makeText(context, progress + "", Toast.LENGTH_LONG).show();
-                //thresholdET.setText(progress);
-            }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                int length = seekBar.getProgress();
-                thresholdET.setText(length + "");
-            }
-        });
-
-        final EditText emailET = (EditText) dialog.findViewById(R.id.editTextAlertEmail);
-        emailET.addTextChangedListener(new TextWatcher() {
-
-            // the user's changes are saved here
-            public void onTextChanged(CharSequence c, int start, int before, int count) {
-                // mCrime.setTitle(c.toString());
-
-
-            }
-
-            public void beforeTextChanged(CharSequence c, int start, int count, int after) {
-                // this space intentionally left blank
-//
-            }
-
-            public void afterTextChanged(Editable c) {
-                // this one too
-
-            }
-        });
-
-
-
-        ///// CLOSE DIALOG WINDOW //////
-        final RadioGroup radioGroup = (RadioGroup) dialog.findViewById(R.id.alert_radio_group);
-        // get selected radio button from radioGroup
-
-
-        final Button dialogButtonCancel = (Button) dialog.findViewById(R.id.alert_cancel_button);
+        final Button dialogButtonCancel = (Button) dialog.findViewById(R.id.group_dialog_cancel_button);
         dialogButtonCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -319,147 +255,32 @@ public class GroupsManagerActivity extends AppCompatActivity {
         });
         ////////////////////////////////////////////////
         ///// SAVE NEW ALERT DETAILS
-        final Button dialogButton = (Button) dialog.findViewById(R.id.dialogButtonOK);
+        final Button dialogButtonOk = (Button) dialog.findViewById(R.id.group_dialog_ok_button);
         // if button is clicked, close the custom dialog
 
-        ////////////////////////////////////////////////////////////////////////////////
-        //// NOTIFICATIN INTERVAL SECTION
-        ////////////////////////////////////////////////////////////////////////////
-        final SeekBar seekBarAlertInterval = (SeekBar) dialog.findViewById(R.id.seekBarAlertInterval);
-        final EditText edittextAlertInterval = (EditText) dialog.findViewById(R.id.editTextAllertInterval);
-
-        edittextAlertInterval.addTextChangedListener(new TextWatcher() {
-
-            // the user's changes are saved here
-            public void onTextChanged(CharSequence c, int start, int before, int count) {
-                // mCrime.setTitle(c.toString());
-
-            }
-
-            public void beforeTextChanged(CharSequence c, int start, int count, int after) {
-                // this space intentionally left blank
-            }
-
-            public void afterTextChanged(Editable c) {
-                // this one too
-                if(!c.toString().equals("")) {
-                    seekBarAlertInterval.setProgress(Integer.parseInt(edittextAlertInterval.getText().toString()));
-                }else{
-                    seekBarAlertInterval.setProgress(10);
-                }
-            }
-        });
-        ///////////////////////////////////////////////////////////////////////
-        //// Listener of SEEKKBAR OF ALERT THRESHOLD
-        ///////////////////////////////////////////////
-        seekBarAlertInterval.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                //Toast.makeText(context, progress + "", Toast.LENGTH_LONG).show();
-                //thresholdET.setText(progress);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBarAlertInterval) {
-                int length = seekBarAlertInterval.getProgress();
-                edittextAlertInterval.setText(length + "");
-            }
-        });
-
-        /// FOR EDIT DIALOG bring alert data
-        if (editGroupDetails != null){
-            alertName.setText(editGroupDetails.getAlertName());
-            seekBar.setProgress(editGroupDetails.getAlertThreshold());
-            thresholdET.setText(editGroupDetails.getAlertThreshold() + "");
-            RadioButton unitRadioButton;
-            if(editGroupDetails.getAlertUnit().equals("km")){
-                unitRadioButton = dialog.findViewById(R.id.km_radioButton);
-            }else{
-                unitRadioButton = dialog.findViewById(R.id.percent_radioButton);
-            }
-            unitRadioButton.setChecked(true);
-            //// NOTIFICATION EDIT ////
-            /// SOUND NOTIF///
-            if (editGroupDetails.getNotificationDetails() != null) {
-                if (editGroupDetails.getNotificationDetails().getSound().equals("sound")) {
-                    CheckBox soundCheckBoox = dialog.findViewById(R.id.checkboxSoundNotif);
-                    soundCheckBoox.setChecked(true);
-                }
-            }
-
-        }
-
-        dialogButton.setOnClickListener(new View.OnClickListener() {
+        EditText et = findViewById(R.id.new_group_name_input);
+        final String new_group_name = et.getText().toString();
+        dialogButtonOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(thresholdET.getText().toString().equals("")) {
-                    displayGroupDialogOK("Please,select alert threshold!");
+                if (new_group_name.isEmpty()) {
+                    Toast.makeText(context, "plz enter new group ", Toast.LENGTH_SHORT).show();
                 }else{
-                    dialog.dismiss();
                     Group group = new Group();
-
-                    int selectedId = radioGroup.getCheckedRadioButtonId();
-
-                    // find the radiobutton by returned id
-                    final RadioButton radioSelectedButton = (RadioButton) dialog.findViewById(selectedId);
-                    Toast.makeText(context, radioSelectedButton.getText(), Toast.LENGTH_SHORT).show();
-                    CheckBox soundNotif = (CheckBox) dialog.findViewById(R.id.checkboxSoundNotif);
-                    EditText emailET = (EditText) dialog.findViewById(R.id.editTextAlertEmail);;
-                    EditText smsET = (EditText) dialog.findViewById(R.id.editTextSMS);
-                    EditText intervalET = (EditText) dialog.findViewById(R.id.editTextAllertInterval);
-
-                    // insert in alerts table first aramtr with alert name and detrmined thresholld
-                    group.setName(alertName.getText().toString());
-
+                    group.setName(new_group_name);
                     groupRepo.insert(group);
-                    // insert second paramtr is percent or numerical
-
-
-                    groupRepo.insert(group);
-                    /*alert.setParam("status");
-                    alert.setValue("on");
-                    alertRepo.insert(alert);
-
-                    if (soundNotif.isChecked()) {
-                        alert.setType("Notification");
-                        alert.setParam("sound");
-                        alert.setValue("default");
-                        alertRepo.insert(alert);
-                    }
-                    if(emailET.getText() != null){
-                        alert.setType("Notification");
-                        alert.setParam("email");
-                        alert.setValue(emailET.getText().toString());
-                        alertRepo.insert(alert);
-                    }
-                    if(smsET.getText() != null){
-                        alert.setType("Notification");
-                        alert.setParam("sms");
-                        alert.setValue(smsET.getText().toString());
-                        alertRepo.insert(alert);
-                    }
-                    if(intervalET.getText() != null){
-                        alert.setType("Notification");
-                        alert.setParam("interval");
-                        alert.setValue(intervalET.getText().toString());
-                        alertRepo.insert(alert);
-                    }*/
-                    groupsList.add(alertName.getText().toString());
-                    displayGroupsList();
+                    groupsList.add(new_group_name);
                 }
+                displayGroupsList();
             }
+
         });
     }
 
-    public void displayGroupDetails(AlertDetails alertDetails){
+    public void displayGroupDetails(Call.Details alertDetails){
         TextView textView = findViewById(R.id.alert_window_details);
         textView.setText(getString(R.string.alertName)+": " + alertDetails.getAlertName() + "\n");
-        textView.append(getString(R.string.threshod) +": " + alertDetails.getAlertThreshold() + " " + alertDetails.getAlertUnit() + "\n");
+        textView.append(getString(R.string.threshod) +": " + alertDetail    s.getAlertThreshold() + " " + alertDetails.getAlertUnit() + "\n");
         if (alertDetails.getNotificationDetails() != null ) {
             textView.append(getString(R.string.notification) + ": \n");
             if(alertDetails.getNotificationDetails().getSound() != null){
