@@ -84,6 +84,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + LogParams.KEY_destination + " TEXT,"
                 + LogParams.KEY_message+ " TEXT) ";
         db.execSQL(CREATE_ALERT_LOG_TABLE);
+
+        String CREATE_GROUP_TABLE = "CREATE TABLE " + Group.TABLE + " ("
+                + Group.KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT , "
+                + Group.KEY_name + " TEXT)";
+        db.execSQL(CREATE_GROUP_TABLE);
+
+        String CREATE_GROUP_MEMBERS_TABLE = "CREATE TABLE " + GroupMembers.TABLE + " ("
+                + GroupMembers.KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT , "
+                + GroupMembers.KEY_GROUP_ID + " INTEGER, "
+                + GroupMembers.KEY_MEMBER + " TEXT, "
+                + GroupMembers.KEY_MEMBER_STATUS + " INTEGER, "
+                + GroupMembers.KEY_VISIBILITY + " TEXT, "
+                + GroupMembers.KEY_INSERT_DATE + " DATETIME, "
+                + GroupMembers.KEY_LAST_LATITUDE + " DOUBLE, "
+                + GroupMembers.KEY_LAST_LONGITUDE + " DOUBLE) ";
+        db.execSQL(CREATE_GROUP_MEMBERS_TABLE);
+
     }
 
     @Override

@@ -82,7 +82,7 @@ public class GroupRepo {
 
 
                 HashMap<String,String> s = new HashMap<String, String>();
-                s.put("group_id",cursor.getString(cursor.getColumnIndex(GroupMembers.KEY_ID)));
+                s.put("group_id",cursor.getString(cursor.getColumnIndex(GroupMembers.KEY_ID )));
                 s.put("member",cursor.getString(cursor.getColumnIndex(GroupMembers.KEY_MEMBER)));
                 s.put("member_status",cursor.getString(cursor.getColumnIndex(GroupMembers.KEY_MEMBER_STATUS)));
                 s.put("visibility",cursor.getString(cursor.getColumnIndex(GroupMembers.KEY_VISIBILITY)));

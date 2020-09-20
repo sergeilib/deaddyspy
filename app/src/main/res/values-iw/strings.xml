@@ -39,5 +39,8 @@
     <string name="alertTitle">התראה</string>
     <string name="start_by_app">יישומים מותקנים</string>
     <string name="paired_device">התקנים מסונכרנים</string>
-    <string name="groups">קבוצות</string>
+    <string name="groupsTitle">קבוצות</string>
+    <string name="group_conf">הגדרת קבוצות</string>
+    <string name="group_list">רשימת קבוצות</string>
+    <string name="new_group_text">קבוצה חדשה</string>
 </resources>

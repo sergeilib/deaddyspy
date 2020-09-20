@@ -72,7 +72,7 @@
         android:layout_marginTop="56dp"
         android:background="@drawable/switch_button_bg"
         android:onClick="startGroupsActivity"
-        android:text="@string/groups"
+        android:text="@string/groupsTitle"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/main_button_history" />

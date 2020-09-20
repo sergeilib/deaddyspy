@@ -40,5 +40,8 @@
     <string name="startup_trigger">startup trigger</string>
     <string name="paired_device">paired devices</string>
     <string name="start_by_app">installed applications</string>
-    <string name="groups">Groups</string>
+    <string name="groupsTitle">Groups</string>
+    <string name="group_conf">Groups configuration</string>
+    <string name="group_list">Group list</string>
+    <string name="new_group_text">New group</string>
 </resources>
