@@ -1,9 +1,14 @@
 package com.example.a30467984.deaddyspy;
 
 import android.app.Dialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telecom.Call;
@@ -57,7 +62,9 @@ public class GroupsManagerActivity extends AppCompatActivity {
     private Map groupsHash;
     private String selectedGroupName;
     private GroupDetails editGroupDetails;
-
+    public static final int REQUEST_READ_CONTACTS = 79;
+    public ListView list;
+    public ArrayList mobileArray;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -240,11 +247,131 @@ public class GroupsManagerActivity extends AppCompatActivity {
                     group.setName(new_group_name);
                     groupRepo.insert(group);
                     groupsList.add(new_group_name);
+                    getContactList(context);
                 }
-                displayGroupsList();
+                //dialog.dismiss();
+ //               displayGroupsList();
             }
 
         });
+    }
+
+    public void getContactList(Context context){
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.contacts_list);
+
+        //dialog.setTitle("Title...");
+
+        // set the custom dialog components - text, image and button
+        //       TextView text = (TextView) dialog.findViewById(R.id.text);
+//        text.setText("Android custom dialog example!");
+
+        dialog.show();
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_CONTACTS)
+                == PackageManager.PERMISSION_GRANTED) {
+            mobileArray = getAllContacts();
+        } else {
+            requestPermission();
+        }
+        list = dialog.findViewById(R.id.contacts_list_listview);
+        ArrayAdapter adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, android.R.id.text1, mobileArray);
+        list.setAdapter(adapter);
+
+        final Button dialogButtonCancel = (Button) dialog.findViewById(R.id.contact_select_cancel);
+        dialogButtonCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        ////////////////////////////////////////////////
+        ///// SAVE NEW ALERT DETAILS
+        final Button dialogButtonOk = (Button) dialog.findViewById(R.id.contact_select_ok);
+        // if button is clicked, close the custom dialog
+
+        //EditText et = dialog.findViewById(R.id.contacts_list_listview);
+        //final String new_group_name = et.getText().toString();
+        dialogButtonOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        public void onItemClick(AdapterView<?> parent, View view,
+                                               int position, long id) {
+                            TextView textView = (TextView) view.findViewById(android.R.id.text1
+                            );
+                            String text = textView.getText().toString();
+                            Toast.makeText(getBaseContext(), "chosen " + text, Toast.LENGTH_SHORT).show();
+                        }
+                        });
+
+                //dialog.dismiss();
+                //               displayGroupsList();
+            }
+
+        });
+    }
+
+    private void requestPermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.READ_CONTACTS)) {
+            // show UI part if you want here to show some rationale !!!
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_CONTACTS},
+                    REQUEST_READ_CONTACTS);
+        }
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.READ_CONTACTS)) {
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_CONTACTS},
+                    REQUEST_READ_CONTACTS);
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_READ_CONTACTS: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mobileArray = getAllContacts();
+                } else {
+                    // permission denied,Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+        }
+    }
+    private ArrayList getAllContacts() {
+        ArrayList<String> nameList = new ArrayList<>();
+        ContentResolver cr = getContentResolver();
+        Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
+                null, null, null, null);
+        if ((cur != null ? cur.getCount() : 0) > 0) {
+            while (cur != null && cur.moveToNext()) {
+                String id = cur.getString(
+                        cur.getColumnIndex(ContactsContract.Contacts._ID));
+                String name = cur.getString(cur.getColumnIndex(
+                        ContactsContract.Contacts.DISPLAY_NAME));
+                nameList.add(name);
+                if (cur.getInt(cur.getColumnIndex( ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+                    Cursor pCur = cr.query(
+                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                            null,
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
+                            new String[]{id}, null);
+                    while (pCur.moveToNext()) {
+                        String phoneNo = pCur.getString(pCur.getColumnIndex(
+                                ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    }
+                    pCur.close();
+                }
+            }
+        }
+        if (cur != null) {
+            cur.close();
+        }
+        return nameList;
     }
 
     public void displayGroupDetails(Call.Details groupDetails){
