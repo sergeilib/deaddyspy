@@ -5,7 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class GroupRepo {
@@ -28,6 +30,26 @@ public class GroupRepo {
         long setting_id = db.insert(Group.TABLE, null, values);
         db.close(); // Closing database connection
         return (int) setting_id;
+    }
+
+    public int insertGroupMember(GroupMembers groupMember) {
+
+        //Open connection to write data
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        Calendar c = Calendar.getInstance();
+        //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        ///String currentDateandTime = sdf
+        values.put(GroupMembers.KEY_GROUP_ID, groupMember.groupID);
+        values.put(GroupMembers.KEY_MEMBER, groupMember.member);
+        values.put(GroupMembers.KEY_MEMBER_NAME, groupMember.memberName);
+        //values.put(GroupMembers.KEY_INSERT_DATE, );
+        values.put(GroupMembers.KEY_MEMBER_STATUS, groupMember.memberStatus);
+        values.put(GroupMembers.KEY_VISIBILITY, groupMember.visibility);
+        // Inserting Row
+        long group_member_id = db.insert(GroupMembers.TABLE, null, values);
+        db.close(); // Closing database connection
+        return (int) group_member_id;
     }
     public Map getGroupsList() {
         //Open connection to read only

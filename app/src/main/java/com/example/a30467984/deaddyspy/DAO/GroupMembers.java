@@ -6,15 +6,20 @@ public class GroupMembers {
     public static final String KEY_ID = "id";
     public static final String KEY_GROUP_ID = "group_id";
     public static final String KEY_MEMBER = "member";
+    public static final String KEY_MEMBER_NAME = "member_name";
     public static final String KEY_MEMBER_STATUS = "member_status";
     public static final String KEY_VISIBILITY = "visibility";
     public static final String KEY_INSERT_DATE = "insert_date";
     public static final String KEY_LAST_LATITUDE = "last_latitude";
     public static final String KEY_LAST_LONGITUDE = "last_longitude";
-
+    public Double lastLongitude;
+    public String insertDate;
+    public boolean visibility;
+    public int trip_number;
     public int groupID;
     public String member;
     public String memberStatus;
+    public String memberName;
     public Double lastLatitude;
 
     public int getGroupID() {
@@ -65,11 +70,11 @@ public class GroupMembers {
         this.insertDate = insertDate;
     }
 
-    public int getVisibility() {
+    public boolean getVisibility() {
         return visibility;
     }
 
-    public void setVisibility(int visibility) {
+    public void setVisibility(boolean visibility) {
         this.visibility = visibility;
     }
 
@@ -81,9 +86,11 @@ public class GroupMembers {
         this.trip_number = trip_number;
     }
 
-    public Double lastLongitude;
-    public String insertDate;
-    public int visibility;
-    public int trip_number;
+    public String getMemberName() {
+        return memberName;
+    }
 
+    public void setMemberName(String memberName) {
+        this.memberName = memberName;
+    }
 }

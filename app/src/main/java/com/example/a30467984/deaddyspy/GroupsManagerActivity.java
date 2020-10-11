@@ -13,41 +13,36 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telecom.Call;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.a30467984.deaddyspy.DAO.Alert;
-import com.example.a30467984.deaddyspy.DAO.AlertRepo;
 import com.example.a30467984.deaddyspy.DAO.Group;
 import com.example.a30467984.deaddyspy.DAO.GroupRepo;
-import com.example.a30467984.deaddyspy.DAO.Point;
-import com.example.a30467984.deaddyspy.DAO.RoutingRepo;
 import com.example.a30467984.deaddyspy.DAO.Settings;
 import com.example.a30467984.deaddyspy.DAO.SettingsRepo;
-import com.example.a30467984.deaddyspy.gps.LocationData;
-import com.example.a30467984.deaddyspy.modules.AlertDetails;
 import com.example.a30467984.deaddyspy.modules.GroupDetails;
-import com.example.a30467984.deaddyspy.modules.NotificationDetails;
+import com.example.a30467984.deaddyspy.DAO.GroupMembers;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+
+import static java.lang.String.valueOf;
 
 public class GroupsManagerActivity extends AppCompatActivity {
     final Context context = this;
@@ -57,14 +52,18 @@ public class GroupsManagerActivity extends AppCompatActivity {
     private ArrayList<String> groupsList = new ArrayList<>();
     private HashSet<String> groupsUniqList = new HashSet<>();
     private ViewGroup.LayoutParams layoutParams;
-    private HashMap groupsDetails = new HashMap();
+
+    private HashMap<String,HashMap<String,ArrayList<String>>> groupObj = new HashMap<String, HashMap<String, ArrayList<String>>>();
     private HashMap editParams= new HashMap();
+
     private Map groupsHash;
     private String selectedGroupName;
     private GroupDetails editGroupDetails;
+    private GroupMembers groupMembers;
     public static final int REQUEST_READ_CONTACTS = 79;
     public ListView list;
-    public ArrayList mobileArray;
+    public ArrayList mobileArray = new ArrayList();
+    public  HashMap mobileHash;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -245,9 +244,13 @@ public class GroupsManagerActivity extends AppCompatActivity {
                 }else{
                     Group group = new Group();
                     group.setName(new_group_name);
-                    groupRepo.insert(group);
+                   // groupRepo.insert(group);
                     groupsList.add(new_group_name);
-                    getContactList(context);
+                    //int group_id = groupRepo.insert(group);
+                    int group_id = 1;
+                    getContactList(context,group_id);
+
+
                 }
                 //dialog.dismiss();
  //               displayGroupsList();
@@ -256,7 +259,7 @@ public class GroupsManagerActivity extends AppCompatActivity {
         });
     }
 
-    public void getContactList(Context context){
+    public void getContactList(final Context context, final int group_id){
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.contacts_list);
 
@@ -270,13 +273,14 @@ public class GroupsManagerActivity extends AppCompatActivity {
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_CONTACTS)
                 == PackageManager.PERMISSION_GRANTED) {
-            mobileArray = getAllContacts();
+            mobileHash = getAllContacts();
         } else {
             requestPermission();
         }
         list = dialog.findViewById(R.id.contacts_list_listview);
+
         ArrayAdapter adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, android.R.id.text1, mobileArray);
+                android.R.layout.simple_list_item_multiple_choice, android.R.id.text1, mobileArray);
         list.setAdapter(adapter);
 
         final Button dialogButtonCancel = (Button) dialog.findViewById(R.id.contact_select_cancel);
@@ -288,24 +292,75 @@ public class GroupsManagerActivity extends AppCompatActivity {
         });
         ////////////////////////////////////////////////
         ///// SAVE NEW ALERT DETAILS
+        final HashMap<String,String> phonePerContact = new HashMap<>();
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                TextView textView = (TextView) view.findViewById(android.R.id.text1
+                );
+                list.setItemChecked(position,true);
+                String text = textView.getText().toString();
+                HashMap bbc = (HashMap) mobileHash.get(String.valueOf(id));
+
+                Set<String> keys =  bbc.keySet();
+
+                //Object arr = groupObj.get(String.valueOf(i)).keySet().toArray();
+                Iterator<String> it = keys.iterator();
+                // Displaying keys. Output will not be in any particular order
+                String key = it.next();
+                ArrayList<String> cntactsPhones= new ArrayList<>();
+                cntactsPhones = (ArrayList<String>) ((HashMap) mobileHash.get(String.valueOf(id))).get(key);
+                if (cntactsPhones.size() > 1 ){
+                    String chosenPhone = dispalayPhonesPerCntact(context,cntactsPhones);
+                    phonePerContact.put(key,chosenPhone);
+                }
+                Toast.makeText(getBaseContext(), "chosen " + text, Toast.LENGTH_SHORT).show();
+            }
+        });
+
         final Button dialogButtonOk = (Button) dialog.findViewById(R.id.contact_select_ok);
         // if button is clicked, close the custom dialog
 
         //EditText et = dialog.findViewById(R.id.contacts_list_listview);
         //final String new_group_name = et.getText().toString();
-        dialogButtonOk.setOnClickListener(new View.OnClickListener() {
+            dialogButtonOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                SparseBooleanArray checked = list.getCheckedItemPositions();
+                for (int i = 0; i < checked.size() ; i++)
+                    if (checked.get(i)) {
+                        if (groupObj.get(valueOf(i)) != null){
+                        //String item = mobileHash.get(i).toString();
+                            //String item = mobileHash.ke
+                            Log.i("INFO","" + groupObj.get(valueOf(i)));
+                            HashMap bb = groupObj.get(valueOf(i));
 
-                list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        public void onItemClick(AdapterView<?> parent, View view,
-                                               int position, long id) {
-                            TextView textView = (TextView) view.findViewById(android.R.id.text1
-                            );
-                            String text = textView.getText().toString();
-                            Toast.makeText(getBaseContext(), "chosen " + text, Toast.LENGTH_SHORT).show();
+                            Set<String> keys =  bb.keySet();
+
+                            //Object arr = groupObj.get(String.valueOf(i)).keySet().toArray();
+                            Iterator<String> it = keys.iterator();
+                            // Displaying keys. Output will not be in any particular order
+                            String key = it.next();
+//                            ArrayList<String> cntactsPhones= new ArrayList<>();
+//                            cntactsPhones = groupObj.get(String.valueOf(i)).get(key);
+//
+//                            for (int j = 0 ; j < cntactsPhones.size();j++) {
+//                                String key = groupObj.get(String.valueOf(i)).keySet().toString();
+                                //ArrayList contactList = groupObj.get(String.valueOf(i)).get(key);
+                                //String phone_num = contactList.get(j).toString();
+                                //editGroupDetails.setGroupName(key);
+                                groupMembers.setGroupID(group_id);
+                                groupMembers.setMember(phonePerContact.get(key));
+                                groupMembers.setMemberName(key);
+                                groupMembers.setVisibility(true);
+
+                                groupRepo.insertGroupMember(groupMembers);
+                                Toast.makeText(getBaseContext(), "chosen " + i + " ; phone: " + phonePerContact.get(key), Toast.LENGTH_SHORT).show();
+                            //}
                         }
-                        });
+                        /* do whatever you want with the checked item */
+                    }
+
 
                 //dialog.dismiss();
                 //               displayGroupsList();
@@ -313,6 +368,50 @@ public class GroupsManagerActivity extends AppCompatActivity {
 
         });
     }
+
+
+    private String dispalayPhonesPerCntact(final Context context, ArrayList phones){
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.contacts_list);
+        dialog.show();
+        final ListView listView=(ListView)findViewById(R.id.contacts_list_listview);
+
+        ArrayList arrayList=new ArrayList<>(Arrays.asList(phones));
+        ArrayAdapter adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_multiple_choice, android.R.id.text1, phones);
+        //list.setAdapter(adapter);
+        //adapter=new ArrayAdapter<String>(this,R.layout.si,R.id.textView2,arrayList);
+        listView.setAdapter(adapter);
+        //txtInput=(EditText)findViewById(R.id.txtinput);
+        //Button btadd=(Button)findViewById(R.id.btadd);
+        final Button dialogButtonCancel = (Button) findViewById(R.id.contact_select_cancel);
+        dialogButtonCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        final Button dialogButtonOk = (Button) dialog.findViewById(R.id.contact_select_ok);
+        final String chosenPhone = null;
+        dialogButtonOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                SparseBooleanArray checked = listView.getCheckedItemPositions();
+                for (int i = 0; i < checked.size() ; i++)
+                    if (checked.get(i)) {
+
+                    }
+                //chosenPhone = checked.toString();
+                //String newitem=txtInput.getText().toString();
+                //arrayList.add(newitem);
+
+
+            }
+        });
+        return chosenPhone;
+    }
+
 
     private void requestPermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.READ_CONTACTS)) {
@@ -333,7 +432,7 @@ public class GroupsManagerActivity extends AppCompatActivity {
         switch (requestCode) {
             case REQUEST_READ_CONTACTS: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mobileArray = getAllContacts();
+                    mobileHash = getAllContacts();
                 } else {
                     // permission denied,Disable the
                     // functionality that depends on this permission.
@@ -342,13 +441,15 @@ public class GroupsManagerActivity extends AppCompatActivity {
             }
         }
     }
-    private ArrayList getAllContacts() {
+    private HashMap getAllContacts() {
         ArrayList<String> nameList = new ArrayList<>();
         ContentResolver cr = getContentResolver();
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
                 null, null, null, null);
+        int counter = 0;
         if ((cur != null ? cur.getCount() : 0) > 0) {
             while (cur != null && cur.moveToNext()) {
+                HashMap groupsDetails = new HashMap();
                 String id = cur.getString(
                         cur.getColumnIndex(ContactsContract.Contacts._ID));
                 String name = cur.getString(cur.getColumnIndex(
@@ -360,18 +461,32 @@ public class GroupsManagerActivity extends AppCompatActivity {
                             null,
                             ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
                             new String[]{id}, null);
+                    ArrayList<String> phones = new ArrayList<String>();
+                    HashSet<String> uniqNumbers = new HashSet<>();
+
                     while (pCur.moveToNext()) {
                         String phoneNo = pCur.getString(pCur.getColumnIndex(
                                 ContactsContract.CommonDataKinds.Phone.NUMBER));
+                        // insert in ist  unique numbers only
+                        if (uniqNumbers.contains(phoneNo) == false) {
+                            phones.add(phoneNo);
+                            uniqNumbers.add(phoneNo);
+                        }
+                        /////////////////////////////////////
                     }
+                    mobileArray.add(name);
+                        groupsDetails.put(name,phones);
+
                     pCur.close();
                 }
+                groupObj.put(valueOf(counter),groupsDetails);
+                counter++;
             }
         }
         if (cur != null) {
             cur.close();
         }
-        return nameList;
+        return groupObj;
     }
 
     public void displayGroupDetails(Call.Details groupDetails){

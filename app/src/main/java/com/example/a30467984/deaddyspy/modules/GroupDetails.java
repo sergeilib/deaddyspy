@@ -5,6 +5,62 @@ public class GroupDetails {
     private int groupID;
     private String status;
     private boolean visibility;
+    private Double lastLongitude;
+    private String insertDate;
+    private String member;
+    private String memberStatus;
+    private String memberName;
+    private Double lastLatitude;
+
+    public Double getLastLongitude() {
+        return lastLongitude;
+    }
+
+    public void setLastLongitude(Double lastLongitude) {
+        this.lastLongitude = lastLongitude;
+    }
+
+    public String getInsertDate() {
+        return insertDate;
+    }
+
+    public void setInsertDate(String insertDate) {
+        this.insertDate = insertDate;
+    }
+
+    public String getMember() {
+        return member;
+    }
+
+    public void setMember(String member) {
+        this.member = member;
+    }
+
+    public String getMemberStatus() {
+        return memberStatus;
+    }
+
+    public void setMemberStatus(String memberStatus) {
+        this.memberStatus = memberStatus;
+    }
+
+    public String getMemberName() {
+        return memberName;
+    }
+
+    public void setMemberName(String memberName) {
+        this.memberName = memberName;
+    }
+
+    public Double getLastLatitude() {
+        return lastLatitude;
+    }
+
+    public void setLastLatitude(Double lastLatitude) {
+        this.lastLatitude = lastLatitude;
+    }
+
+
 
     public boolean isVisibility() {
         return visibility;
