@@ -41,14 +41,14 @@
         android:track="@drawable/switch_track_custom" />
 
     <Switch
-        android:id="@+id/language_switch"
+        android:id="@+id/location_sharing_switch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/switch_button_bg"
         android:checked="false"
-        android:onClick="updateRecordParam"
+        android:onClick="updateSharingLocation"
         android:paddingLeft="10dp"
-        android:text="@string/app_speed_record"
+        android:text="@string/location_sharing"
         android:textOff="Mile/h"
         android:textOn="km/h"
         android:track="@drawable/switch_track_custom" />

@@ -6,7 +6,7 @@
     <string name="history_button_list">רשימת נסיעות</string>
     <string name="waiting_gps">ממתין לקליטת GPS</string>
     <string name="history">היסטוריה</string>
-    <string name="app_name">Deaddy Spy</string>
+    <string name="app_name">הצג מיקום</string>
     <string name="settings">הגדרות</string>
     <string name="google_maps_key">AIzaSyColoGQ7stZsEVK5KbuFW_W8J6abjMZMvM</string>
     <string name="title_activity_maps">map</string>
@@ -43,4 +43,6 @@
     <string name="group_conf">הגדרת קבוצות</string>
     <string name="group_list">רשימת קבוצות</string>
     <string name="new_group_text">קבוצה חדשה</string>
+    <string name="show_on_map">הצג על מפה</string>
+    <string name="location_sharing">שיטוף מיקום</string>
 </resources>

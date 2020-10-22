@@ -52,14 +52,16 @@ public class GroupsManagerActivity extends AppCompatActivity {
     private ArrayList<String> groupsList = new ArrayList<>();
     private HashSet<String> groupsUniqList = new HashSet<>();
     private ViewGroup.LayoutParams layoutParams;
-
+    private String chosenPhoneLast;
     private HashMap<String,HashMap<String,ArrayList<String>>> groupObj = new HashMap<String, HashMap<String, ArrayList<String>>>();
     private HashMap editParams= new HashMap();
 
     private Map groupsHash;
+    private HashMap groupsHashByNameKey = new HashMap();
     private String selectedGroupName;
-    private GroupDetails editGroupDetails;
-    private GroupMembers groupMembers;
+    private GroupDetails editGroupDetails = new GroupDetails();
+
+    private GroupMembers groupMembers = new GroupMembers();
     public static final int REQUEST_READ_CONTACTS = 79;
     public ListView list;
     public ArrayList mobileArray = new ArrayList();
@@ -67,19 +69,31 @@ public class GroupsManagerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         //DatabaseHelper db = new DatabaseHelper(this);
         setContentView(R.layout.groups_configuration);
         Settings settings = new Settings();
         SettingsRepo settingsRepo = new SettingsRepo(this);
 //        settingsRepo.dropSettingsTable();
-
+        groupListView = (ListView)findViewById(R.id.group_window_list);
         HashMap settingsList = settingsRepo.getSettingsList();
+        getGroupsList();
+        displayGroupsList();
 
     }
 
     public void getGroupsList(){
         groupsList.clear();
         groupsHash = groupRepo.getGroupsList();
+        ///// create hashmap group nmae to group id
+        Iterator it = groupsHash.entrySet().iterator();
+        while (it.hasNext()){
+            Map.Entry pair = (Map.Entry)it.next();
+            HashMap tmp = (HashMap) groupsHash.get(String.valueOf(pair.getKey()));
+            groupsHashByNameKey.put(tmp.get("name"),tmp.get("id"));
+        }
+
+        /////////////////////////////////////////////////////////////
         if(groupsHash.size() > 0) {
             Iterator<String> keySetIterator = groupsHash.keySet().iterator();
             while (keySetIterator.hasNext()) {
@@ -102,7 +116,7 @@ public class GroupsManagerActivity extends AppCompatActivity {
     public void removeGroup(View view){
         if(selectedGroupName != null){
             AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
-            builder1.setMessage("Do you want to remove " + selectedGroupName + " alert");
+            builder1.setMessage("Do you want to remove " + selectedGroupName + " group");
             builder1.setCancelable(true);
 
             builder1.setPositiveButton(
@@ -111,12 +125,13 @@ public class GroupsManagerActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int id) {
                             dialog.cancel();
                             try {
+                                groupRepo.deleteGroupMemberByGrouId(Integer.parseInt(groupsHashByNameKey.get(selectedGroupName).toString()));
                                 groupRepo.deleteGroup(selectedGroupName);
                             }catch(Exception e){
                                 Log.i("ERROR",e.getMessage());
                             }
-                            Toast.makeText(GroupsManagerActivity.this, selectedGroupName + " alert removed", Toast.LENGTH_SHORT).show();
-                           // getAlertList();
+                            Toast.makeText(GroupsManagerActivity.this, selectedGroupName + " group removed", Toast.LENGTH_SHORT).show();
+                            getGroupsList();
                             displayGroupsList();
                         }
                     });
@@ -141,9 +156,15 @@ public class GroupsManagerActivity extends AppCompatActivity {
         if(selectedGroupName.equals("")){
             displayGroupDialogOK("Please  select group");
         }else {
-            editGroupDetails = fetchGroupDetails(selectedGroupName);
+            //editGroupDetails = fetchGroupDetails(selectedGroupName);
             buildGroupDialog();
             editGroupDetails = null;
+        }
+    }
+
+    public void showGroupOnMap(View view){
+        if (selectedGroupName != null) {
+
         }
     }
 
@@ -169,22 +190,24 @@ public class GroupsManagerActivity extends AppCompatActivity {
                 final String item = (String) parent.getItemAtPosition(position);
                 selectedGroupName = item;
                 Toast.makeText(context, item + "", Toast.LENGTH_SHORT).show();
-                GroupDetails groupDetails = fetchGroupDetails(item);
+                //GroupDetails groupDetails = fetchGroupDetails(item);
                 //         Map curentAlertParams = alertRepo.getAlertParamsByName(item);
-                //displayGroupDetails(groupsDetails);
+                Log.i("INFO",groupsHashByNameKey.get(item).toString());
+                displayGroupDetails(Integer.parseInt(groupsHashByNameKey.get(item).toString()));
             }
         });
     }
 
-    public GroupDetails fetchGroupDetails(String groupName){
-        Map curentAlertParams = groupRepo.getGroupParamsByName(groupName);
-        GroupDetails groupDetails = new GroupDetails();
-
-        groupDetails.setGroupName(groupName );
-
-
-        return groupDetails;
-    }
+//    public GroupDetails fetchGroupDetails(String groupName){
+//        Map curentGroupParams = groupRepo.getGroupParamsByName(groupName);
+//        GroupDetails groupDetails = new GroupDetails();
+//
+//        groupDetails.setGroupName(groupName );
+//        groupDetails.setGroupID(Integer.parseInt(curentGroupParams.get("group_id").toString()));
+//        groupDetails.setMemberName(curentGroupParams.get("member_name").toString());
+//
+//        return groupDetails;
+//    }
 
     public void buildGroupDialog(){
         final Dialog dialog = new Dialog(context);
@@ -234,20 +257,34 @@ public class GroupsManagerActivity extends AppCompatActivity {
         final Button dialogButtonOk = (Button) dialog.findViewById(R.id.group_dialog_ok_button);
         // if button is clicked, close the custom dialog
 
-        EditText et = dialog.findViewById(R.id.new_group_name_input);
-        final String new_group_name = et.getText().toString();
+        final EditText et = dialog.findViewById(R.id.new_group_name_input);
+        final String new_group_name;
+        et.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {
+
+                // you can call or do what you want with your EditText here
+                //new_group_name = s.toString();
+                // yourEditText...
+            }
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
         dialogButtonOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (new_group_name.isEmpty()) {
+                if (et.getText().toString().isEmpty()) {
                     Toast.makeText(context, "plz enter new group ", Toast.LENGTH_SHORT).show();
                 }else{
                     Group group = new Group();
-                    group.setName(new_group_name);
+                    group.setName(et.getText().toString());
                    // groupRepo.insert(group);
-                    groupsList.add(new_group_name);
-                    //int group_id = groupRepo.insert(group);
-                    int group_id = 1;
+                    groupsList.add(et.getText().toString());
+                    int group_id = groupRepo.insert(group);
+
                     getContactList(context,group_id);
 
 
@@ -258,7 +295,11 @@ public class GroupsManagerActivity extends AppCompatActivity {
 
         });
     }
-
+    ////////////////////////////////////////////////////////////////////////
+    /////  getContactist - method for selecting wantable members for grooup
+    ///// if contact has more than ne number will be ened dialog bx to select
+    ///// relevant number
+    /////////////////////////////////////////////////////////////////////
     public void getContactList(final Context context, final int group_id){
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.contacts_list);
@@ -327,43 +368,36 @@ public class GroupsManagerActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 SparseBooleanArray checked = list.getCheckedItemPositions();
-                for (int i = 0; i < checked.size() ; i++)
-                    if (checked.get(i)) {
-                        if (groupObj.get(valueOf(i)) != null){
-                        //String item = mobileHash.get(i).toString();
-                            //String item = mobileHash.ke
-                            Log.i("INFO","" + groupObj.get(valueOf(i)));
-                            HashMap bb = groupObj.get(valueOf(i));
+                //Iterator iterator = checked.
+                HashMap groupDetails = new HashMap();
+                for (int i = 0; i < checked.size() ; i++) {
+                    Log.i("INFO",String.valueOf(checked.keyAt(i)));
+                    if (checked.valueAt(i)) {
+                        if (groupObj.get(String.valueOf(checked.keyAt(i))) != null) {
 
-                            Set<String> keys =  bb.keySet();
+                            Log.i("INFO", "" + groupObj.get(checked.keyAt(i)));
+                            HashMap bb = groupObj.get(String.valueOf(checked.keyAt(i)));
+                            Set<String> keys = bb.keySet();
 
-                            //Object arr = groupObj.get(String.valueOf(i)).keySet().toArray();
                             Iterator<String> it = keys.iterator();
                             // Displaying keys. Output will not be in any particular order
                             String key = it.next();
-//                            ArrayList<String> cntactsPhones= new ArrayList<>();
-//                            cntactsPhones = groupObj.get(String.valueOf(i)).get(key);
-//
-//                            for (int j = 0 ; j < cntactsPhones.size();j++) {
-//                                String key = groupObj.get(String.valueOf(i)).keySet().toString();
-                                //ArrayList contactList = groupObj.get(String.valueOf(i)).get(key);
-                                //String phone_num = contactList.get(j).toString();
-                                //editGroupDetails.setGroupName(key);
-                                groupMembers.setGroupID(group_id);
-                                groupMembers.setMember(phonePerContact.get(key));
-                                groupMembers.setMemberName(key);
-                                groupMembers.setVisibility(true);
 
-                                groupRepo.insertGroupMember(groupMembers);
-                                Toast.makeText(getBaseContext(), "chosen " + i + " ; phone: " + phonePerContact.get(key), Toast.LENGTH_SHORT).show();
+                            groupMembers.setGroupID(group_id);
+                            groupMembers.setMember(phonePerContact.get(key));
+                            groupMembers.setMemberName(key);
+                            groupMembers.setVisibility(true);
+
+                            groupRepo.insertGroupMember(groupMembers);
+
+                            Toast.makeText(getBaseContext(), "chosen " + i + " ; phone: " + phonePerContact.get(key), Toast.LENGTH_SHORT).show();
                             //}
                         }
                         /* do whatever you want with the checked item */
                     }
-
-
-                //dialog.dismiss();
-                //               displayGroupsList();
+                }
+                dialog.dismiss();
+                displayGroupDetails(group_id);
             }
 
         });
@@ -372,19 +406,20 @@ public class GroupsManagerActivity extends AppCompatActivity {
 
     private String dispalayPhonesPerCntact(final Context context, ArrayList phones){
         final Dialog dialog = new Dialog(context);
+        final ArrayList phonesArr = phones;
         dialog.setContentView(R.layout.contacts_list);
         dialog.show();
-        final ListView listView=(ListView)findViewById(R.id.contacts_list_listview);
+        final ListView listView=(ListView)dialog.findViewById(R.id.contacts_list_listview);
 
         ArrayList arrayList=new ArrayList<>(Arrays.asList(phones));
         ArrayAdapter adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_multiple_choice, android.R.id.text1, phones);
+                android.R.layout.simple_list_item_single_choice, android.R.id.text1, phones);
         //list.setAdapter(adapter);
         //adapter=new ArrayAdapter<String>(this,R.layout.si,R.id.textView2,arrayList);
         listView.setAdapter(adapter);
         //txtInput=(EditText)findViewById(R.id.txtinput);
         //Button btadd=(Button)findViewById(R.id.btadd);
-        final Button dialogButtonCancel = (Button) findViewById(R.id.contact_select_cancel);
+        final Button dialogButtonCancel = (Button) dialog.findViewById(R.id.contact_select_cancel);
         dialogButtonCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -395,21 +430,22 @@ public class GroupsManagerActivity extends AppCompatActivity {
         final String chosenPhone = null;
         dialogButtonOk.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 SparseBooleanArray checked = listView.getCheckedItemPositions();
-                for (int i = 0; i < checked.size() ; i++)
+                for (int i = 0; i < checked.size(); i++){
                     if (checked.get(i)) {
-
+                         //Log.i("INFO",phonesArr.get(checked.keyAt(i)).toString());
+                         chosenPhoneLast = phonesArr.get(checked.keyAt(i)).toString();
                     }
+
                 //chosenPhone = checked.toString();
                 //String newitem=txtInput.getText().toString();
                 //arrayList.add(newitem);
-
-
+                    dialog.dismiss();
+                }
             }
         });
-        return chosenPhone;
+        return chosenPhoneLast;
     }
 
 
@@ -445,7 +481,7 @@ public class GroupsManagerActivity extends AppCompatActivity {
         ArrayList<String> nameList = new ArrayList<>();
         ContentResolver cr = getContentResolver();
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
-                null, null, null, null);
+                null, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
         int counter = 0;
         if ((cur != null ? cur.getCount() : 0) > 0) {
             while (cur != null && cur.moveToNext()) {
@@ -454,8 +490,9 @@ public class GroupsManagerActivity extends AppCompatActivity {
                         cur.getColumnIndex(ContactsContract.Contacts._ID));
                 String name = cur.getString(cur.getColumnIndex(
                         ContactsContract.Contacts.DISPLAY_NAME));
-                nameList.add(name);
+
                 if (cur.getInt(cur.getColumnIndex( ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+                    nameList.add(name);
                     Cursor pCur = cr.query(
                             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                             null,
@@ -475,12 +512,14 @@ public class GroupsManagerActivity extends AppCompatActivity {
                         /////////////////////////////////////
                     }
                     mobileArray.add(name);
-                        groupsDetails.put(name,phones);
+                    groupsDetails.put(name,phones);
 
                     pCur.close();
+                    groupObj.put(String.valueOf(counter),groupsDetails);
+                    counter++;
                 }
-                groupObj.put(valueOf(counter),groupsDetails);
-                counter++;
+
+
             }
         }
         if (cur != null) {
@@ -489,11 +528,25 @@ public class GroupsManagerActivity extends AppCompatActivity {
         return groupObj;
     }
 
-    public void displayGroupDetails(Call.Details groupDetails){
-        TextView textView = findViewById(R.id.alert_window_details);
+    public void displayGroupDetails(int group_id){
+        Map groupDetails = groupRepo.getGroupParamsByGroupId(group_id);
+        Iterator it = groupDetails.entrySet().iterator();
+        ArrayList membersList = new ArrayList();
+        while (it.hasNext()){
+            Map.Entry pair = (Map.Entry)it.next();
+            HashMap tmp = (HashMap) pair.getValue();
+            //groupsHashByNameKey.put(tmp.get("name"),tmp.get("id"));
+            membersList.add(tmp.get("member_name"));
+        }
+        ListView listView = findViewById(R.id.group_window_details);
 //        textView.setText(getString(R.string.alertName)+": " + groupDetails.getGroupName() + "\n");
 //        textView.append(getString(R.string.threshod) +": " + groupDetails    s.getAlertThreshold() + " " + alertDetails.getAlertUnit() + "\n");
-
+        ArrayList arrayList=new ArrayList<>(Arrays.asList(membersList));
+        ArrayAdapter adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_single_choice, android.R.id.text1, membersList);
+        //list.setAdapter(adapter);
+        //adapter=new ArrayAdapter<String>(this,R.layout.si,R.id.textView2,arrayList);
+        listView.setAdapter(adapter);
     }
 
     private void displayGroupDialogOK(String message){

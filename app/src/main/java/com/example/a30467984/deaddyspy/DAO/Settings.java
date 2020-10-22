@@ -29,6 +29,7 @@ public class Settings {
         stringContentValues.put("paired_depend","");
         stringContentValues.put("app_depend","");
         stringContentValues.put("alert_activity","false");
+        stringContentValues.put("sharing_location","false");
         return stringContentValues;
     }
     public void setStringContentValues(String param,String value){

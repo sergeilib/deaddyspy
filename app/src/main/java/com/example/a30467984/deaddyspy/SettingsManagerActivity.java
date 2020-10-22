@@ -90,6 +90,7 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
         displayLanguageParams(settingsList);
         displaySpeedUnit(settingsList);
         displayRecordParam(settingsList);
+        displaySharingLlocation(settingsList);
 
     }
 
@@ -172,6 +173,31 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
         } else {
             settingsRepo.updateSettings("record", "false");
             Toast.makeText(SettingsManagerActivity.this, "Cancel Record", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void displaySharingLlocation(HashMap settingsList) {
+        if (settingsList.containsKey("sharing_location")) {
+            Switch sw = (Switch) findViewById(R.id.location_sharing_switch);
+
+            String unit = ((HashMap<String, String>) settingsList.get("sharing_location")).get("value");
+            if (unit.equals("true")) {
+                sw.setChecked(true);
+            } else {
+                sw.setChecked(false);
+            }
+        }
+    }
+
+    public void updateSharingLocation(View v) {
+        Switch sw = (Switch) findViewById(R.id.location_sharing_switch);
+        if (sw.isChecked()) {
+            settingsRepo.updateSettings("sharing_location", "true");
+            Toast.makeText(SettingsManagerActivity.this, "Allow sharing location", Toast.LENGTH_SHORT).show();
+
+        } else {
+            settingsRepo.updateSettings("sharing_location", "false");
+            Toast.makeText(SettingsManagerActivity.this, "Cancel sharing location", Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="history">история</string>
-    <string name="app_name">Deaddy  Spy</string>
+    <string name="app_name">показать на карте</string>
     <string name="settings">настройки</string>
     <string name="app_scale">Единица измерения</string>
     <string name="app_speed_record">ные на вашем устройстве</string>

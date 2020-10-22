@@ -44,4 +44,6 @@
     <string name="group_conf">Groups configuration</string>
     <string name="group_list">Group list</string>
     <string name="new_group_text">New group</string>
+    <string name="show_on_map">show map</string>
+    <string name="location_sharing">location sharing</string>
 </resources>

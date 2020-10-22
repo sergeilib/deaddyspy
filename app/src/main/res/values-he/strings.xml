@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources><string name="app_name">Deaddy Spy</string>
+<resources><string name="app_name">הצג מיקום</string>
     <string name="app_scale">יחידת מדידה</string>
     <string name="app_speed_record">שמור נתונים על המכשיר</string>
     <string name="history_button_last">נסיעה אחרונה</string>
@@ -42,4 +42,6 @@
     <string name="group_conf">הגדרת קבוצות</string>
     <string name="group_list">רשימת קבוצות</string>
     <string name="new_group_text">קבוצה חדשה</string>
+    <string name="show_on_map">הצג על מפה</string>
+    <string name="location_sharing">שיטוף מיקום</string>
 </resources>

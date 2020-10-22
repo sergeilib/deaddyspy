@@ -86,6 +86,11 @@ public class ServerConnection extends Activity implements TaskCompleted{
                                     singleToneAuthToen.setToken(jsonObj.getString("token"));
                                     break;
                                 }
+                            case "get_sharing_location":
+                                if (jsonObj.getString("token") != null){
+
+                                    break;
+                                }
                         }
                     } catch (JSONException e) {
                         Log.i("ERROR", e.getMessage());
@@ -111,6 +116,16 @@ public class ServerConnection extends Activity implements TaskCompleted{
         }
     }
 
+    public void updateDaddyServer(Object object){
+        new ServerAsyncConnection(ServerConnection.this).execute(object);
+
+        JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
+        try {
+            Log.i("INFO", jsonObj.get("token").toString());
+        }catch (JSONException j){
+            Log.i("ERR",j.getMessage());
+        }
+    }
 
     private JSONObject convertJson2Object(String json){
         try {
@@ -136,7 +151,7 @@ public class ServerConnection extends Activity implements TaskCompleted{
 
     }
 
-    private class ServerAsyncConnection extends AsyncTask<Object, Void, HashMap<String,String>> {
+    public class ServerAsyncConnection extends AsyncTask<Object, Void, HashMap<String,String>> {
         // onPreExecute called before the doInBackgroud start for display
         // progress dialog.
         private TaskCompleted mCallback;

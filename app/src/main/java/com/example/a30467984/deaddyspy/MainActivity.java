@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.example.a30467984.deaddyspy.DAO.Settings;
 import com.example.a30467984.deaddyspy.DAO.SettingsRepo;
 import com.example.a30467984.deaddyspy.Server.ServerConnection;
+import com.example.a30467984.deaddyspy.background.BackgroundHandler;
 import com.example.a30467984.deaddyspy.utils.RequestHandler;
 import com.example.a30467984.deaddyspy.utils.SingleToneAuthToen;
 
@@ -92,6 +93,12 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.text_frame_layout).setVisibility(View.INVISIBLE);
         findViewById(R.id.daddy_spy_first_constraint_layout).setVisibility(View.VISIBLE);
         appServerInit();
+        goToBackground();
+    }
+
+    public void goToBackground(){
+        BackgroundHandler backgroundHandler = new BackgroundHandler(getBaseContext(),activity,20000,getAppUUID());
+        backgroundHandler.waitingHandler();
     }
 
     public void startSpeedometer(View view) {

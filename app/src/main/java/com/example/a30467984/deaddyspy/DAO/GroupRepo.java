@@ -51,6 +51,9 @@ public class GroupRepo {
         db.close(); // Closing database connection
         return (int) group_member_id;
     }
+
+
+
     public Map getGroupsList() {
         //Open connection to read only
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
@@ -89,7 +92,7 @@ public class GroupRepo {
                 GroupMembers.KEY_MEMBER + "," +
                 GroupMembers.KEY_MEMBER_STATUS + "," +
                 GroupMembers.KEY_VISIBILITY + "," +
-                GroupMembers.KEY_LAST_LONGITUDE  +
+                GroupMembers.KEY_LAST_LONGITUDE  + "," +
                 GroupMembers.KEY_LAST_LATITUDE  +
                 " FROM " + GroupMembers.TABLE +
                 " WHERE " +
@@ -116,6 +119,42 @@ public class GroupRepo {
         db.close();
         return groupMemberstHash;
     }
+
+    public Map getGroupParamsByGroupId(int group_id){
+        SQLiteDatabase db = databaseHelper.getReadableDatabase();
+        String selectQuery =  "SELECT  " +
+                GroupMembers.KEY_ID + "," +
+                GroupMembers.KEY_MEMBER + "," +
+                GroupMembers.KEY_MEMBER_NAME + "," +
+                GroupMembers.KEY_MEMBER_STATUS + "," +
+                GroupMembers.KEY_VISIBILITY + "," +
+                GroupMembers.KEY_LAST_LONGITUDE  + "," +
+                GroupMembers.KEY_LAST_LATITUDE  +
+                " FROM " + GroupMembers.TABLE +
+                " WHERE " +
+                GroupMembers.KEY_GROUP_ID + "=?";
+
+        //Student student = new Student();
+        //ArrayList<HashMap<String, String>> alertHash = new ArrayList<HashMap<String, String>>();
+        Map<String,HashMap<String,String>> groupMemberstHash = new HashMap<String, HashMap<String, String>>();
+        Cursor cursor = db.rawQuery(selectQuery, new String[] {String.valueOf(group_id)});
+        if (cursor.moveToFirst()) {
+            do {
+                HashMap<String,String> s = new HashMap<String, String>();
+                s.put("group_id",cursor.getString(cursor.getColumnIndex(GroupMembers.KEY_ID )));
+                s.put("member",cursor.getString(cursor.getColumnIndex(GroupMembers.KEY_MEMBER)));
+                s.put("member_name",cursor.getString(cursor.getColumnIndex(GroupMembers.KEY_MEMBER_NAME)));
+                s.put("member_status",cursor.getString(cursor.getColumnIndex(GroupMembers.KEY_MEMBER_STATUS)));
+                s.put("visibility",cursor.getString(cursor.getColumnIndex(GroupMembers.KEY_VISIBILITY)));
+                groupMemberstHash.put(cursor.getString(cursor.getColumnIndex(GroupMembers.KEY_ID)),s);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return groupMemberstHash;
+    }
+
 
     /*public Map getAlertValuesByName(String name){
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
@@ -179,7 +218,23 @@ public class GroupRepo {
 
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         // It's a good practice to use parameter ?, instead of concatenate string
-        db.delete(Group.TABLE, Group.KEY_ID + "= ?", new String[] { name });
+        db.delete(Group.TABLE, Group.KEY_name + "= ?", new String[] { name });
+        db.close(); // Closing database connection
+    }
+
+    public void deleteGroupById(int id ) {
+
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        // It's a good practice to use parameter ?, instead of concatenate string
+        db.delete(Group.TABLE, Group.KEY_ID + "= ?", new String[] { String.valueOf(id) });
+        db.close(); // Closing database connection
+    }
+
+
+    public void deleteGroupMemberByGrouId(int group_id){
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        // It's a good practice to use parameter ?, instead of concatenate string
+        db.delete(GroupMembers.TABLE, GroupMembers.KEY_GROUP_ID + "= ?", new String[] { String.valueOf(group_id) });
         db.close(); // Closing database connection
     }
 
