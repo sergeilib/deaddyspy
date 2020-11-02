@@ -157,7 +157,7 @@ public class GroupsManagerActivity extends AppCompatActivity {
             displayGroupDialogOK("Please  select group");
         }else {
             //editGroupDetails = fetchGroupDetails(selectedGroupName);
-            buildGroupDialog();
+            getContactList(context,Integer.parseInt(groupsHashByNameKey.get(selectedGroupName).toString()));
             editGroupDetails = null;
         }
     }
@@ -241,9 +241,7 @@ public class GroupsManagerActivity extends AppCompatActivity {
             }
         });
 
-        ///////////////////////////////////////////////////////////////////////
-        //// Listener of SEEKKBAR OF ALERT THRESHOLD
-        ///////////////////////////////////////////////
+
 
         final Button dialogButtonCancel = (Button) dialog.findViewById(R.id.group_dialog_cancel_button);
         dialogButtonCancel.setOnClickListener(new View.OnClickListener() {
@@ -289,15 +287,15 @@ public class GroupsManagerActivity extends AppCompatActivity {
 
 
                 }
-                //dialog.dismiss();
- //               displayGroupsList();
+                dialog.dismiss();
+                displayGroupsList();
             }
 
         });
     }
     ////////////////////////////////////////////////////////////////////////
     /////  getContactist - method for selecting wantable members for grooup
-    ///// if contact has more than ne number will be ened dialog bx to select
+    ///// if contact has more than one number will be ened dialog box to select
     ///// relevant number
     /////////////////////////////////////////////////////////////////////
     public void getContactList(final Context context, final int group_id){

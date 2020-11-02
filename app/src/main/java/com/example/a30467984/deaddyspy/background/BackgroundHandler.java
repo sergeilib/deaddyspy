@@ -53,7 +53,6 @@ public class BackgroundHandler {
                 }
             },interval);
 
-
         }
 
         public HashMap getSettings(){
@@ -66,7 +65,7 @@ public class BackgroundHandler {
             if (settingList.containsKey("sharing_location")) {
 
                 String ifShareLocation = ((HashMap<String, String>) settingList.get("sharing_location")).get("value");
-                if (ifShareLocation == "true") {
+                if (ifShareLocation.equals("true")) {
                     locationData = new LocationData(context,settingList,activity,1);
                     Double longitude = locationData.getLongitude();
                     Double latitude = locationData.getLatitude();
