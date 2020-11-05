@@ -98,7 +98,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void goToBackground(){
         BackgroundHandler backgroundHandler = new BackgroundHandler(getBaseContext(),activity,20000,getAppUUID());
-        backgroundHandler.waitingHandler();
+        try {
+            backgroundHandler.waitingHandler();
+        }catch (RuntimeException e){
+            Log.i("ERR",e.getMessage());
+        }
     }
 
     public void startSpeedometer(View view) {

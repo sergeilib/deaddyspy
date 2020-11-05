@@ -63,7 +63,7 @@ public class ServerConnection extends Activity implements TaskCompleted{
         /////////////////////////////////////////////
         //// waiting this asynk task ended
         ////////////////////////////////////
-        for (int sec = 0 ; sec < 10 ; sec++)
+        for (int sec = 0 ; sec < 10 ; sec++) {
             try {
                 Thread.sleep(1000);
                 if (connectionResponse.getStatus() != null) {
@@ -72,7 +72,7 @@ public class ServerConnection extends Activity implements TaskCompleted{
                     try {
                         switch (jsonObj.getString("func")) {
                             case "first_register":
-                                if ( jsonObj.getString("token") != null) {
+                                if (jsonObj.getString("token") != null) {
                                     SharedPreferences sharedPrefs = context.getSharedPreferences(
                                             PREF_MY_DADDY, Context.MODE_PRIVATE);
                                     SharedPreferences.Editor editor = sharedPrefs.edit();
@@ -81,39 +81,58 @@ public class ServerConnection extends Activity implements TaskCompleted{
                                     break;
                                 }
                             case "get_tmp_tkn":
-                                if ( jsonObj.getString("token") != null) {
+                                if (jsonObj.getString("token") != null) {
                                     SingleToneAuthToen singleToneAuthToen = SingleToneAuthToen.getInstance();
                                     singleToneAuthToen.setToken(jsonObj.getString("token"));
                                     break;
                                 }
                             case "get_sharing_location":
-                                if (jsonObj.getString("token") != null){
+                                if (jsonObj.getString("token") != null) {
 
                                     break;
                                 }
                         }
+                        break;
                     } catch (JSONException e) {
                         Log.i("ERROR", e.getMessage());
                     }
+
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+        }
         Log.i("INFO",String.valueOf(serverAsyncConnection.getStatus()));
     }
 
     public void getAuthRequest(Object object){
 
         new ServerAsyncConnection(ServerConnection.this).execute(object);
+        for (int sec = 0 ; sec < 10 ; sec++){
+            try {
+                Thread.sleep(1000);
+                Log.i("INFO","ITERATION:" + sec );
+                if (connectionResponse.getStatus() != null) {
+                    JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
+                    SingleToneAuthToen singleToneAuthToen = SingleToneAuthToen.getInstance();
+                    try {
+                        singleToneAuthToen.setToken(jsonObj.get("token").toString());
+                    }catch (JSONException e){
+                        Log.i("ERROR",e.getMessage());
+                    }
+                    break;
+                    //JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
+                }else{
 
-        JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
+                }
+            }catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
 
-        SingleToneAuthToen singleToneAuthToen = SingleToneAuthToen.getInstance();
-        try {
-            singleToneAuthToen.setToken(jsonObj.get("token").toString());
-        }catch (JSONException e){
-            Log.i("ERROR",e.getMessage());
         }
+
+
+
     }
 
     public void updateDaddyServer(Object object){
@@ -121,6 +140,7 @@ public class ServerConnection extends Activity implements TaskCompleted{
 
         JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
         try {
+            Log.i("INFO","updateDaddyServer");
             Log.i("INFO", jsonObj.get("token").toString());
         }catch (JSONException j){
             Log.i("ERR",j.getMessage());
@@ -128,13 +148,16 @@ public class ServerConnection extends Activity implements TaskCompleted{
     }
 
     private JSONObject convertJson2Object(String json){
+        JSONObject jsonObject = null;
         try {
-            JSONObject jsonObject = new JSONObject(json);
-            return jsonObject;
+            jsonObject = new JSONObject(json);
+            Log.i("INFO",jsonObject.getString("token"));
+            //JSONObject jsonObject = new JSONObject("\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OTQsImlhdCI6MTYwNDQ3ODc4OCwiZXhwIjoxNjA0NTY1MTg4fQ.eDojL9xwKuyVIB5l3Xz-DalBOzNVl4A4y-pOdi6CXFY\",\"func\":\"get_tmp_tkn\",\"code\":\"1000\",\"error\":\"false\"");
+            // return jsonObject;
         }catch (JSONException e){
             Log.i("ERROR",e.getMessage());
         }
-        return null;
+        return jsonObject;
     }
 
     @Override

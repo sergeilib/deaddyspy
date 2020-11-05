@@ -70,19 +70,26 @@ public class BackgroundHandler {
                     Double longitude = locationData.getLongitude();
                     Double latitude = locationData.getLatitude();
                     if (longitude > 0 && latitude > 0){
-                        Object object = prepareConnectionObject();
-                        updateServerSharingLlocation(object);
+                        String android_id = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+                        String url_suffix = "location/sharing_location?android_id=" +  android_id + "&last_longitude=" + longitude +
+                                "&last_latitude=" + latitude;
+                        Object object = prepareConnectionObject(url_suffix);
+                        try {
+                            updateServerSharingLlocation(object);
+                        }catch (Exception e){
+                            Log.i("ERROR",e.getMessage());
+                        }
                     }
 
                 }
             }
         }
 
-    public Object prepareConnectionObject(){
+    public Object prepareConnectionObject(String url_suffix){
         Object[] object = new Object[2];
         URL url = null;
         try {
-            url = new URL(path + "sharing");
+            url = new URL(path + url_suffix);
         }catch (MalformedURLException m){
             Log.i("ERR",m.getMessage());
         }
@@ -113,7 +120,7 @@ public class BackgroundHandler {
 
     }
 
-    private JSONObject convertJson2Object(String json){
+    /*private JSONObject convertJson2Object(String json){
         try {
             JSONObject jsonObject = new JSONObject(json);
             return jsonObject;
@@ -121,5 +128,5 @@ public class BackgroundHandler {
             Log.i("ERROR",e.getMessage());
         }
         return null;
-    }
+    }*/
 }
