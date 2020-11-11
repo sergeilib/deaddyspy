@@ -32,7 +32,7 @@ public class BackgroundHandler {
         private String path = "https://li780-236.members.linode.com:443/api/";
         private ServerConnection serverConnection;
         private ConnectionResponse connectionResponse;
-
+        private final HashMap settingList;
 
         public BackgroundHandler(Context context, Activity activity ,int interval,String uuid){
             connectionResponse = new ConnectionResponse();
@@ -41,10 +41,16 @@ public class BackgroundHandler {
             this.activity = activity;
             serverConnection = new ServerConnection(this.context,this.activity);
             this.uuid = uuid;
+            settingList = getSettings();
+            locationData = new LocationData(context,settingList,activity,1);
         }
 
         public void waitingHandler(){
-            final HashMap settingList = getSettings();
+            try {
+                Thread.sleep(10000);
+            }catch (InterruptedException e){
+                Thread.currentThread().interrupt();
+            }
             handler.postDelayed(runnable = new Runnable() {
                 @Override
                 public void run() {
@@ -66,7 +72,7 @@ public class BackgroundHandler {
 
                 String ifShareLocation = ((HashMap<String, String>) settingList.get("sharing_location")).get("value");
                 if (ifShareLocation.equals("true")) {
-                    locationData = new LocationData(context,settingList,activity,1);
+
                     Double longitude = locationData.getLongitude();
                     Double latitude = locationData.getLatitude();
                     if (longitude > 0 && latitude > 0){
@@ -74,10 +80,14 @@ public class BackgroundHandler {
                         String url_suffix = "location/sharing_location?android_id=" +  android_id + "&last_longitude=" + longitude +
                                 "&last_latitude=" + latitude;
                         Object object = prepareConnectionObject(url_suffix);
-                        try {
-                            updateServerSharingLlocation(object);
-                        }catch (Exception e){
-                            Log.i("ERROR",e.getMessage());
+                        if(object != null) {
+                            try {
+                                updateServerSharingLlocation(object);
+                            } catch (Exception e) {
+                                Log.i("ERROR", "CHeckSharingLoocation" + e.getMessage());
+                            }
+                        }else {
+                            Log.i("INFO", "The token is NULL, Can't update location");
                         }
                     }
 
@@ -96,16 +106,22 @@ public class BackgroundHandler {
         object[0] = url;
 
         HashMap<String,String> params = new HashMap<>();
+
         String tkn = getSessionToken();
+        if (tkn == null){
+            //ServerConnection serverConnection = new ServerConnection(context, activity);
+            //serverConnection.getAuthRequest(object);
+            return null;
+        }
         params.put("token", tkn);
         params.put("method", "POST");
         object[1] = params;
-        JSONObject jsonObject = new JSONObject(params);
+        //JSONObject jsonObject = new JSONObject(params);
         // RequestHandler requestHandler = new RequestHandler();
         //requestHandler.sendPost(url,jsonObject);
-        ServerConnection serverConnection = new ServerConnection(context, activity);
-        serverConnection.getAuthRequest(object);
-        return jsonObject;
+        //ServerConnection serverConnection = new ServerConnection(context, activity);
+        //serverConnection.getAuthRequest(object);
+        return object;
     }
 
     public String getSessionToken(){

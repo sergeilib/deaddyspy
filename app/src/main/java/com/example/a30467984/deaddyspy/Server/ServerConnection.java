@@ -106,21 +106,27 @@ public class ServerConnection extends Activity implements TaskCompleted{
     }
 
     public void getAuthRequest(Object object){
-
+        Log.i("INFO","SUBJECT getAuthRequest: " + object.toString());
         new ServerAsyncConnection(ServerConnection.this).execute(object);
         for (int sec = 0 ; sec < 10 ; sec++){
             try {
                 Thread.sleep(1000);
                 Log.i("INFO","ITERATION:" + sec );
                 if (connectionResponse.getStatus() != null) {
-                    JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
-                    SingleToneAuthToen singleToneAuthToen = SingleToneAuthToen.getInstance();
-                    try {
-                        singleToneAuthToen.setToken(jsonObj.get("token").toString());
-                    }catch (JSONException e){
-                        Log.i("ERROR",e.getMessage());
+                    if (connectionResponse.getStatus().equals("failure")){
+                        Log.i("INFO",connectionResponse.getError()  );
+                        break;
+                    }else {
+
+                        JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
+                        SingleToneAuthToen singleToneAuthToen = SingleToneAuthToen.getInstance();
+                        try {
+                            singleToneAuthToen.setToken(jsonObj.get("token").toString());
+                        } catch (JSONException e) {
+                            Log.i("ERROR", e.getMessage());
+                        }
+                        break;
                     }
-                    break;
                     //JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
                 }else{
 
@@ -136,6 +142,8 @@ public class ServerConnection extends Activity implements TaskCompleted{
     }
 
     public void updateDaddyServer(Object object){
+        Log.i("INFO","SUBJECT updateDaddyServer: " + object.toString());
+
         new ServerAsyncConnection(ServerConnection.this).execute(object);
 
         JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
@@ -193,6 +201,7 @@ public class ServerConnection extends Activity implements TaskCompleted{
 
         @Override
         protected HashMap<String,String> doInBackground(Object... objects) {
+            Log.i("INFO","doInBackground "+ objects[0].toString() );
             Object[] obj = (Object[]) objects[0];
             URL url = (URL)obj[0];
             HashMap<String,String> params = (HashMap<String,String>)obj[1];

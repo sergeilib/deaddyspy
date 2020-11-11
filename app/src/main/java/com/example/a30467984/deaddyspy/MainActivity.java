@@ -441,7 +441,7 @@ public class MainActivity extends AppCompatActivity {
                 params.put("token", tkn);
                 params.put("method", "POST");
                 object[1] = params;
-                JSONObject jsonObject = new JSONObject(params);
+                //JSONObject jsonObject = new JSONObject(params);
                 // RequestHandler requestHandler = new RequestHandler();
                 //requestHandler.sendPost(url,jsonObject);
                 ServerConnection serverConnection = new ServerConnection(getBaseContext(), activity);

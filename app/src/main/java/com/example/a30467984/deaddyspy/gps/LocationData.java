@@ -262,7 +262,10 @@ public class LocationData extends Activity implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         try {
-            TextView textView_gps_signal = (TextView) activity.findViewById(R.id.no_gps_signal);
+            if (this.activity == null){
+                return;
+            }
+            TextView textView_gps_signal = (TextView) this.activity.findViewById(R.id.no_gps_signal);
             if (location.getProvider().equals(LocationManager.NETWORK_PROVIDER)) {
                 textView_gps_signal.setVisibility(View.VISIBLE);
             } else {
@@ -385,7 +388,7 @@ public class LocationData extends Activity implements LocationListener {
             Toast.makeText(mContext, "4", Toast.LENGTH_SHORT).show();
             textView_speed.setText("" + visual_speed);
         }catch (Exception e){
-            //Log.i("INFO", e.toString());
+            Log.i("INFO", e.toString());
             Toast.makeText(mContext, e.toString()+ e.getStackTrace(), Toast.LENGTH_SHORT).show();
 
         }
