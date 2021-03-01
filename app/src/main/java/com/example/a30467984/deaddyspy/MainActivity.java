@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.constraint.ConstraintLayout;
@@ -16,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 //        findViewById(R.id.text_frame_layout).setVisibility(View.VISIBLE);
         checkLanguage(settingsRepo);
-        ///String phoneNuber = getPhoneNumber();
+ //      String phoneNuber = getPhoneNumber();
         /*String uniqueAppId = getAppUUID();
 
         if (uniqueAppId == null){
@@ -324,14 +326,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String getPhoneNumber() {
-        TelephonyManager mTelephony = (TelephonyManager) this.getBaseContext().getSystemService(
+        TelephonyManager mTelephony = (TelephonyManager) getBaseContext().getSystemService(
                 Context.TELEPHONY_SERVICE);
 
 
         ///TelephonyManager mTelephony = null;
         if ((int) Build.VERSION.SDK_INT < 23) {
             //this is a check for build version below 23
-            mTelephony = (TelephonyManager) this.getBaseContext().getSystemService(
+            mTelephony = (TelephonyManager) getBaseContext().getSystemService(
                     Context.TELEPHONY_SERVICE);
 
 
@@ -355,7 +357,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             } else {
-                mTelephony = (TelephonyManager) this.getBaseContext().getSystemService(
+                mTelephony = (TelephonyManager) getBaseContext().getSystemService(
                         Context.TELEPHONY_SERVICE);
                 Log.i("INFO", "If Permission is granted");
             }
@@ -363,7 +365,16 @@ public class MainActivity extends AppCompatActivity {
 
         }
         if (mTelephony != null) {
-            return mTelephony.getLine1Number();
+            
+
+            String country_code = mTelephony.getSimCountryIso();
+            String networ_oper = mTelephony.getNetworkCountryIso();
+            
+            String code = getApplicationContext().getResources().getConfiguration().locale.getCountry();
+            Locale locale = Locale.getDefault();
+            String country_code_dd = locale.getCountry();
+            String phn = mTelephony.getLine1Number();
+            return country_code+mTelephony.getLine1Number();
         }else{
             return null;
         }

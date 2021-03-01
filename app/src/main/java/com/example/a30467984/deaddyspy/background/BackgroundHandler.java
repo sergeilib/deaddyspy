@@ -1,16 +1,24 @@
 package com.example.a30467984.deaddyspy.background;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.example.a30467984.deaddyspy.DAO.SettingsRepo;
+import com.example.a30467984.deaddyspy.R;
 import com.example.a30467984.deaddyspy.Server.ServerConnection;
 import com.example.a30467984.deaddyspy.gps.LocationData;
 import com.example.a30467984.deaddyspy.modules.ConnectionResponse;
+import com.example.a30467984.deaddyspy.utils.MyDevice;
 import com.example.a30467984.deaddyspy.utils.SingleToneAuthToen;
 
 import org.json.JSONException;
@@ -19,6 +27,7 @@ import org.json.JSONObject;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Locale;
 
 
 public class BackgroundHandler {
@@ -33,6 +42,8 @@ public class BackgroundHandler {
         private ServerConnection serverConnection;
         private ConnectionResponse connectionResponse;
         private final HashMap settingList;
+        private MyDevice myDevice;
+        public static boolean SETTINGS_CHANGE_FLAG = false;
 
         public BackgroundHandler(Context context, Activity activity ,int interval,String uuid){
             connectionResponse = new ConnectionResponse();
@@ -43,6 +54,7 @@ public class BackgroundHandler {
             this.uuid = uuid;
             settingList = getSettings();
             locationData = new LocationData(context,settingList,activity,1);
+            myDevice = new MyDevice(context,activity);
         }
 
         public void waitingHandler(){
@@ -69,15 +81,18 @@ public class BackgroundHandler {
 
         public void checkSharingLlocation(HashMap settingList) {
             if (settingList.containsKey("sharing_location")) {
-
+                if (SETTINGS_CHANGE_FLAG == true){
+                    settingList = getSettings();
+                    SETTINGS_CHANGE_FLAG = false;
+                }
                 String ifShareLocation = ((HashMap<String, String>) settingList.get("sharing_location")).get("value");
                 if (ifShareLocation.equals("true")) {
-
+                    String phone = myDevice.getFullPhoneNumber();
                     Double longitude = locationData.getLongitude();
                     Double latitude = locationData.getLatitude();
                     if (longitude > 0 && latitude > 0){
                         String android_id = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-                        String url_suffix = "location/sharing_location?android_id=" +  android_id + "&last_longitude=" + longitude +
+                        String url_suffix = "location/sharing_location?phone=" + phone + "&android_id=" +  android_id + "&last_longitude=" + longitude +
                                 "&last_latitude=" + latitude;
                         Object object = prepareConnectionObject(url_suffix);
                         if(object != null) {
@@ -145,4 +160,6 @@ public class BackgroundHandler {
         }
         return null;
     }*/
+
+
 }

@@ -3,12 +3,15 @@ package com.example.a30467984.deaddyspy.Server;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Switch;
 
+import com.example.a30467984.deaddyspy.MapsActivity;
 import com.example.a30467984.deaddyspy.gps.LocationData;
+import com.example.a30467984.deaddyspy.maps.DisplayMapWithMarkers;
 import com.example.a30467984.deaddyspy.modules.ConnectionResponse;
 import com.example.a30467984.deaddyspy.modules.TaskCompleted;
 import com.example.a30467984.deaddyspy.utils.RequestHandler;
@@ -134,11 +137,7 @@ public class ServerConnection extends Activity implements TaskCompleted{
             }catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-
         }
-
-
-
     }
 
     public void updateDaddyServer(Object object){
@@ -153,6 +152,48 @@ public class ServerConnection extends Activity implements TaskCompleted{
         }catch (JSONException j){
             Log.i("ERR",j.getMessage());
         }
+    }
+
+    public void getGroupLocation(Object object, HashMap phone2Contact){
+        new ServerAsyncConnection(ServerConnection.this).execute(object);
+
+        //JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
+        for (int sec = 0 ; sec < 10 ; sec++){
+            try {
+                Thread.sleep(1000);
+                Log.i("INFO","ITERATION:" + sec );
+                if (connectionResponse.getStatus() != null) {
+                    if (connectionResponse.getStatus().equals("failure")){
+                        Log.i("INFO",connectionResponse.getError()  );
+                        break;
+                    }else {
+
+                        JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
+
+                        //SingleToneAuthToen singleToneAuthToen = SingleToneAuthToen.getInstance();
+                        try {
+                            //jsonObj.put("phone2name",phone2Contact);
+                            Intent i = new Intent(this.context, DisplayMapWithMarkers.class);
+                            i.putExtra("GroupLocation",connectionResponse.getMessage());
+                            i.putExtra("phone2ContactName",phone2Contact);
+                            // Starts TargetActivity
+                            startActivity(i);
+                          //  singleToneAuthToen.setToken(jsonObj.get("token").toString());
+                        } catch (Exception e) {
+                            Log.i("ERROR", e.getMessage());
+                        }
+                        break;
+                    }
+                    //JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
+                }else{
+
+                }
+            }catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+        }
+
     }
 
     private JSONObject convertJson2Object(String json){

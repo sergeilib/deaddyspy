@@ -1,13 +1,17 @@
 package com.example.a30467984.deaddyspy;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -30,10 +34,13 @@ import com.example.a30467984.deaddyspy.DAO.Group;
 import com.example.a30467984.deaddyspy.DAO.GroupRepo;
 import com.example.a30467984.deaddyspy.DAO.Settings;
 import com.example.a30467984.deaddyspy.DAO.SettingsRepo;
+import com.example.a30467984.deaddyspy.Server.ServerConnection;
 import com.example.a30467984.deaddyspy.modules.GroupDetails;
 import com.example.a30467984.deaddyspy.DAO.GroupMembers;
+import com.example.a30467984.deaddyspy.utils.MyDevice;
 
 import java.lang.reflect.Array;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -42,6 +49,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import static java.lang.String.join;
 import static java.lang.String.valueOf;
 
 public class GroupsManagerActivity extends AppCompatActivity {
@@ -55,7 +63,7 @@ public class GroupsManagerActivity extends AppCompatActivity {
     private String chosenPhoneLast;
     private HashMap<String,HashMap<String,ArrayList<String>>> groupObj = new HashMap<String, HashMap<String, ArrayList<String>>>();
     private HashMap editParams= new HashMap();
-
+    private Activity activity;
     private Map groupsHash;
     private HashMap groupsHashByNameKey = new HashMap();
     private String selectedGroupName;
@@ -66,6 +74,12 @@ public class GroupsManagerActivity extends AppCompatActivity {
     public ListView list;
     public ArrayList mobileArray = new ArrayList();
     public  HashMap mobileHash;
+    private String path = "https://li780-236.members.linode.com:443/api/";
+    private static String uniqueID = null;
+    private static final String PREF_MY_DADDY = "PREF_MY_DADDY";
+    private static final String PREF_UNIQUE_ID = "PREF_UNIQUE_ID";
+    private static final String AUTH_TKN = "AUTH_TKN";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,6 +141,7 @@ public class GroupsManagerActivity extends AppCompatActivity {
                             try {
                                 groupRepo.deleteGroupMemberByGrouId(Integer.parseInt(groupsHashByNameKey.get(selectedGroupName).toString()));
                                 groupRepo.deleteGroup(selectedGroupName);
+                                groupsHashByNameKey.remove(selectedGroupName);
                             }catch(Exception e){
                                 Log.i("ERROR",e.getMessage());
                             }
@@ -162,9 +177,53 @@ public class GroupsManagerActivity extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void showGroupOnMap(View view){
         if (selectedGroupName != null) {
+            HashMap<String,String> phone2Contact = new HashMap<>();
+            Map groupDetails = groupRepo.getGroupParamsByGroupId(Integer.parseInt(groupsHashByNameKey.get(selectedGroupName).toString()));
+            Iterator it = groupDetails.entrySet().iterator();
+            ArrayList membersList = new ArrayList();
+            while (it.hasNext()){
+                Map.Entry pair = (Map.Entry)it.next();
+                HashMap tmp = (HashMap) pair.getValue();
+                //groupsHashByNameKey.put(tmp.get("name"),tmp.get("id"));
 
+                membersList.add(tmp.get("member"));
+                phone2Contact.put(tmp.get("member").toString(),tmp.get("member_name").toString());
+            }
+            try {
+                HashMap<String, String> params = new HashMap<>();
+                //params.put("url",path + "first_register");
+                //params.put("method","POST");
+                SharedPreferences sharedPrefs = getBaseContext().getSharedPreferences(
+                        PREF_MY_DADDY, Context.MODE_PRIVATE);
+
+                String tkn = sharedPrefs.getString(AUTH_TKN, null);
+                //params.put("android_id", android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID));
+                String phones_string = String.join(",",membersList);
+                Object[] object = new Object[2];
+
+
+                //params.put("uuid",uniqueID);
+                if (tkn != null) {
+
+                    params.put("token", tkn);
+                    params.put("method", "GET");
+                    object[1] = params;
+                    URL url = new URL(path + "location/fetch_location?phone="+ phones_string + "&token=" + tkn );
+                    object[0] = url;
+                    //JSONObject jsonObject = new JSONObject(params);
+                    // RequestHandler requestHandler = new RequestHandler();
+                    //requestHandler.sendPost(url,jsonObject);
+                    ServerConnection serverConnection = new ServerConnection(getBaseContext(), activity);
+                    serverConnection.getGroupLocation(object,phone2Contact);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Can't establish connection with server", Toast.LENGTH_SHORT).show();
+                }
+            }catch (Exception e){
+                Log.i("ERROR",e.getMessage());
+            }
         }
     }
 
@@ -282,7 +341,7 @@ public class GroupsManagerActivity extends AppCompatActivity {
                    // groupRepo.insert(group);
                     groupsList.add(et.getText().toString());
                     int group_id = groupRepo.insert(group);
-
+                    groupsHashByNameKey.put(group.name,String.valueOf(group_id));
                     getContactList(context,group_id);
 
 
@@ -349,9 +408,12 @@ public class GroupsManagerActivity extends AppCompatActivity {
                 String key = it.next();
                 ArrayList<String> cntactsPhones= new ArrayList<>();
                 cntactsPhones = (ArrayList<String>) ((HashMap) mobileHash.get(String.valueOf(id))).get(key);
+                MyDevice myDevice = new MyDevice(context,activity);
                 if (cntactsPhones.size() > 1 ){
                     String chosenPhone = dispalayPhonesPerCntact(context,cntactsPhones);
-                    phonePerContact.put(key,chosenPhone);
+                    phonePerContact.put(key,checkIntDialInclude(chosenPhone));
+                }else{
+                    phonePerContact.put(key,checkIntDialInclude(cntactsPhones.get(0)));
                 }
                 Toast.makeText(getBaseContext(), "chosen " + text, Toast.LENGTH_SHORT).show();
             }
@@ -434,6 +496,7 @@ public class GroupsManagerActivity extends AppCompatActivity {
                     if (checked.get(i)) {
                          //Log.i("INFO",phonesArr.get(checked.keyAt(i)).toString());
                          chosenPhoneLast = phonesArr.get(checked.keyAt(i)).toString();
+
                     }
 
                 //chosenPhone = checked.toString();
@@ -443,9 +506,22 @@ public class GroupsManagerActivity extends AppCompatActivity {
                 }
             }
         });
-        return chosenPhoneLast;
+
+        return checkCountryCode(chosenPhoneLast);
     }
 
+    public String checkCountryCode(String phone){
+        if (phone.startsWith("+")){
+            return phone;
+        }
+        MyDevice myDevice = new MyDevice(context,activity);
+        String dialCode = myDevice.getCountryDialCode();
+        if(phone.startsWith("0")){
+            phone.replaceFirst("^0","");
+        }
+        return "+" + dialCode + phone;
+
+    }
 
     private void requestPermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.READ_CONTACTS)) {
@@ -564,4 +640,19 @@ public class GroupsManagerActivity extends AppCompatActivity {
         alert11.show();
     }
 
+    private String checkIntDialInclude(String phone){
+        MyDevice myDevice = new MyDevice(context,activity);
+        if (phone.startsWith("+")){
+            return phone;
+        }
+        String countryCode = myDevice.getCountryDialCode();
+        if (phone.startsWith(countryCode)){
+            return "+" + phone;
+        }else{
+            phone = phone.replaceFirst("^0","");
+            return "+" + countryCode + phone;
+        }
+
+
+    }
 }

@@ -43,7 +43,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".AlertManagerActivity"></activity>
-
+        <activity android:name=".maps.DisplayMapWithMarkers"></activity>
     </application>
 
 </manifest>

@@ -14,6 +14,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.Menu;
@@ -24,8 +25,10 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -37,10 +40,12 @@ import com.example.a30467984.deaddyspy.DAO.RoutingRepo;
 import com.example.a30467984.deaddyspy.DAO.Settings;
 import com.example.a30467984.deaddyspy.DAO.SettingsRepo;
 import com.example.a30467984.deaddyspy.R;
+import com.example.a30467984.deaddyspy.background.BackgroundHandler;
 import com.example.a30467984.deaddyspy.gps.LocationData;
 import com.example.a30467984.deaddyspy.modules.AlertDetails;
 import com.example.a30467984.deaddyspy.modules.AppList;
 import com.example.a30467984.deaddyspy.modules.CustomLanguageSpinnerAdapter;
+import com.example.a30467984.deaddyspy.utils.MyDevice;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -183,6 +188,7 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
             String unit = ((HashMap<String, String>) settingsList.get("sharing_location")).get("value");
             if (unit.equals("true")) {
                 sw.setChecked(true);
+
             } else {
                 sw.setChecked(false);
             }
@@ -191,14 +197,59 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
 
     public void updateSharingLocation(View v) {
         Switch sw = (Switch) findViewById(R.id.location_sharing_switch);
+        MyDevice myDevice = new MyDevice(context,SettingsManagerActivity.this);
         if (sw.isChecked()) {
-            settingsRepo.updateSettings("sharing_location", "true");
-            Toast.makeText(SettingsManagerActivity.this, "Allow sharing location", Toast.LENGTH_SHORT).show();
+            if (myDevice.getFullPhoneNumber() != null) {
 
+                settingsRepo.updateSettings("sharing_location", "true");
+                BackgroundHandler.SETTINGS_CHANGE_FLAG = true;
+                Toast.makeText(SettingsManagerActivity.this, "Allow sharing location", Toast.LENGTH_SHORT).show();
+            }else{
+                String phone = askForDevicePhoneNumber(myDevice);
+                Toast.makeText(SettingsManagerActivity.this, "Phone not found", Toast.LENGTH_SHORT).show();
+            }
         } else {
             settingsRepo.updateSettings("sharing_location", "false");
+            BackgroundHandler.SETTINGS_CHANGE_FLAG = true;
             Toast.makeText(SettingsManagerActivity.this, "Cancel sharing location", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public String askForDevicePhoneNumber(final MyDevice myDevice) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this.context);
+        alertDialog.setTitle("My Phone number");
+        alertDialog.setMessage("Enter Phone number");
+
+        final EditText input = new EditText(context);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        alertDialog.setView(input);
+        //alertDialog.setIcon(R.drawable.key);
+
+        alertDialog.setPositiveButton("YES",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        //myDevicePhone = input.getText().toString();
+                        //if (myDevicePhone.compareTo("") == 0) {
+
+                        //}
+                          myDevice.savePhoneOnDisk(input.getText().toString());
+                    }
+                });
+
+        alertDialog.setNegativeButton("NO",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        alertDialog.show();
+
+        //return myDevicePhone;
+        return "blal";
     }
 
     @Override

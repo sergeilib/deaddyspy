@@ -178,25 +178,27 @@ public class RequestHandler {
                 return hv.verify("li780-236.members.linode.com",session);
             }
         };
-
+        
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
         conn.setSSLSocketFactory(context.getSocketFactory());
         conn.setHostnameVerifier(hostnameVerifier);
-        conn.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:25.0) Gecko/20100101 Firefox/25.0");
-        conn.addRequestProperty("x-access-token",postDataParams.get("token").toString());
-        conn.setReadTimeout(20000);
-        conn.setConnectTimeout(20000);
-        conn.setRequestMethod("GET");
-        conn.setDoInput(true);
-        conn.setDoOutput(true);
+        conn.setAllowUserInteraction(false);
+        conn.setInstanceFollowRedirects(true);
+        //conn.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:25.0) Gecko/20100101 Firefox/25.0");
+        //conn.addRequestProperty("x-access-token",postDataParams.get("token").toString());
+        //conn.setReadTimeout(20000);
+        //conn.setConnectTimeout(20000);
+        //conn.setRequestMethod("GET");
+        //conn.setDoInput(true);
+        //conn.setDoOutput(true);
 //        conn.connect();
-        OutputStream os = conn.getOutputStream();
-        BufferedWriter writer = new BufferedWriter( new OutputStreamWriter(os, "UTF-8"));
+        //OutputStream os = conn.getOutputStream();
+        //BufferedWriter writer = new BufferedWriter( new OutputStreamWriter(os, "UTF-8"));
        // writer.write(encodeParams(postDataParams));
-        writer.write("{\"android_id\":\"13793fd1780accf6\"}" );
-        writer.flush();
-        writer.close();
-        os.close();
+        //writer.write("{\"android_id\":\"13793fd1780accf6\"}" );
+        //writer.flush();
+        //writer.close();
+        //os.close();
 
         int responseCode=conn.getResponseCode(); // To Check for 200
         String postResponse = null;
@@ -218,6 +220,7 @@ public class RequestHandler {
         return postResponse;
 
     }
+
     private static String encodeParams(JSONObject params) throws Exception {
         StringBuilder result = new StringBuilder();
         boolean first = true;
