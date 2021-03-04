@@ -177,7 +177,7 @@ public class ServerConnection extends Activity implements TaskCompleted{
                             i.putExtra("GroupLocation",connectionResponse.getMessage());
                             i.putExtra("phone2ContactName",phone2Contact);
                             // Starts TargetActivity
-                            startActivity(i);
+                            this.context.startActivity(i);
                           //  singleToneAuthToen.setToken(jsonObj.get("token").toString());
                         } catch (Exception e) {
                             Log.i("ERROR", e.getMessage());

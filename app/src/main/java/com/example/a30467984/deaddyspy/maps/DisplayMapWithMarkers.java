@@ -7,12 +7,14 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.example.a30467984.deaddyspy.DAO.Point;
 import com.example.a30467984.deaddyspy.R;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -42,6 +44,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -57,6 +60,8 @@ import java.util.Set;
     public class DisplayMapWithMarkers extends AppCompatActivity implements OnMapReadyCallback {
         SupportMapFragment mapFragment;
         private ArrayList rideData;
+        private String groupLocation;
+        static private float ZOOM_IN_VALLUE = 13f;
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -64,9 +69,9 @@ import java.util.Set;
             Intent i = getIntent();
             //rideData = (ArrayList) i.getSerializableExtra("RideData");
             Bundle extras = i.getExtras();
-            String groupLocation = extras.getString("GroupLocation");
+            groupLocation = extras.getString("GroupLocation");
             String phone2contact = extras.getString("phone2ContactName");
-            JSONObject jsonObj = convertJson2Object(groupLocation);
+
 
             mapFragment = (SupportMapFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.map);
@@ -78,23 +83,47 @@ import java.util.Set;
                 @Override
                 public void onMapReady(GoogleMap googleMap) {
                     googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    JSONObject jsonObj = convertJson2Object(groupLocation);
+                    JSONObject jsonResultObj;
+                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                    try {
+                        jsonResultObj = jsonObj.getJSONObject("json_result");
+                        Iterator<String> temp = jsonResultObj.keys();
+                        LatLng latLng = null;
+                        int marersCounter = 0;
+                        while (temp.hasNext()) {
+                            marersCounter++;
+                            String key = temp.next();
+                            JSONArray groupMemberParams = jsonResultObj.getJSONArray(key);
 
-                    for (int i = 1; i < rideData.size() - 1;i++) {
+                            JSONObject groupMemberParamsJSONArray = groupMemberParams.getJSONObject(0);
+                            Double latitude = (Double) groupMemberParamsJSONArray.get("last_latitude");
+                            Double longitude = (Double) groupMemberParamsJSONArray.get("last_longitude");
                             googleMap.addMarker(new MarkerOptions()
-                    //                .position(new LatLng(latitudeSrc, longitudeSrc))
-                                    .title("Start")
+                                    .position(new LatLng(latitude, longitude))
+                                    .anchor(0.5f, 0.5f)
+                                    .title(key)
+                                    .snippet("baa")
                                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                      //      googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitudeSrc, longitudeSrc), 10));
+                            latLng = new LatLng(latitude,longitude);
+
+                            builder.include(latLng);
+                        }
+                        CameraUpdate cu = null;
+                        if (marersCounter == 1){
+                            if (latLng != null) {
+                                cu = CameraUpdateFactory.newLatLngZoom(latLng,ZOOM_IN_VALLUE);
+
+                            }
+                        }else{
+                            LatLngBounds bounds = builder.build();
+                            cu = CameraUpdateFactory.newLatLngBounds(bounds,15);
+                        }
+                        googleMap.animateCamera(cu);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
 
-//                            googleMap.addMarker(new MarkerOptions()
-//                                    .position(new LatLng(37.4629101, -122.2449094))
-//                                    .title("Facebook")
-//                                    .snippet("Facebook HQ: Menlo Park"));
-
-
-
-                    //googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitudeSrc, -122.0728817), 10));
                 }
             });
         }
