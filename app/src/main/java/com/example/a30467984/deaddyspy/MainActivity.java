@@ -2,6 +2,8 @@ package com.example.a30467984.deaddyspy;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +14,7 @@ import android.content.res.Resources;
 import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.provider.Telephony;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -30,7 +33,9 @@ import android.widget.Toast;
 import com.example.a30467984.deaddyspy.DAO.Settings;
 import com.example.a30467984.deaddyspy.DAO.SettingsRepo;
 import com.example.a30467984.deaddyspy.Server.ServerConnection;
+import com.example.a30467984.deaddyspy.background.BackgroundBroadcastReceiver;
 import com.example.a30467984.deaddyspy.background.BackgroundHandler;
+import com.example.a30467984.deaddyspy.utils.MyDevice;
 import com.example.a30467984.deaddyspy.utils.RequestHandler;
 import com.example.a30467984.deaddyspy.utils.SingleToneAuthToen;
 
@@ -95,9 +100,29 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.text_frame_layout).setVisibility(View.INVISIBLE);
         findViewById(R.id.daddy_spy_first_constraint_layout).setVisibility(View.VISIBLE);
         appServerInit();
-        goToBackground();
+//        MyDevice myDevice = new MyDevice(this,activity);
+//        myDevice.setWifiApState(this);
+        //goToBackground();
+        scheduleAlarm();
+
+
     }
 
+    public void scheduleAlarm() {
+        // Construct an intent that will execute the AlarmReceiver
+        Intent intent = new Intent(getApplicationContext(), BackgroundBroadcastReceiver.class);
+        // Create a PendingIntent to be triggered when the alarm goes off
+        final PendingIntent pIntent = PendingIntent.getBroadcast(this, BackgroundBroadcastReceiver.REQUEST_CODE,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        // Setup periodic alarm every every half hour from this point onwards
+        long firstMillis = System.currentTimeMillis(); // alarm is set right away
+        AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        // First parameter is the type: ELAPSED_REALTIME, ELAPSED_REALTIME_WAKEUP, RTC_WAKEUP
+        // Interval can be INTERVAL_FIFTEEN_MINUTES, INTERVAL_HALF_HOUR, INTERVAL_HOUR, INTERVAL_DAY
+        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, firstMillis,
+                60000, pIntent);
+
+    }
     public void goToBackground(){
         BackgroundHandler backgroundHandler = new BackgroundHandler(getBaseContext(),activity,20000,getAppUUID());
         try {

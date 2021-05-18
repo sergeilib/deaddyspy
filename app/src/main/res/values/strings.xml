@@ -255,4 +255,9 @@
         <item>260,ZM</item>
         <item>263,ZW</item>
     </string-array>
+    <string name="routine_configuration_title">routine configuration</string>
+    <string name="routine_selected_paired_device">selected paired device</string>
+    <string name="start_daddy_spy">start daddy spy</string>
+    <string name="routine_name">routine name</string>
+    <string name="start_hotspot">start hotspot</string>
 </resources>

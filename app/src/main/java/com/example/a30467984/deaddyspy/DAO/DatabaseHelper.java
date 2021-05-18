@@ -19,7 +19,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //version number to upgrade database version
     //each time if you Add, Edit table, you need to change the
     //version number.
-    private static final int DATABASE_VERSION = 10;
+    private static final int DATABASE_VERSION = 11;
 
     public DatabaseHelper(Context context ) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -102,6 +102,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + GroupMembers.KEY_LAST_LONGITUDE + " DOUBLE) ";
         db.execSQL(CREATE_GROUP_MEMBERS_TABLE);
 
+        String CREATE_ROUTINE_TABLE = "CREATE TABLE " + Routins.TABLE + " ("
+                + Routins.KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT , "
+                + Routins.KEY_PAIRED_DEVICE +  " TEXT, "
+                + Routins.KEY_APP + " TEXT, "
+                + Routins.KEY_ROUTINE_NAME + " TEXT, "
+                + Routins.KEY_ACTION + " TEXT) ";
+        db.execSQL(CREATE_ROUTINE_TABLE);
     }
 
     @Override
@@ -113,6 +120,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + LogParams.TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + Group.TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + GroupMembers.TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + Routins.TABLE);
         // Create tables again
         onCreate(db);
 

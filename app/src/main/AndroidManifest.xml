@@ -11,6 +11,12 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+
+
 
     <application
         android:allowBackup="true"
@@ -44,6 +50,15 @@
         </activity>
         <activity android:name=".AlertManagerActivity"></activity>
         <activity android:name=".maps.DisplayMapWithMarkers"></activity>
+
+        <receiver
+            android:name=".background.BackgroundBroadcastReceiver"
+            android:process=":remote" >
+        </receiver>
+        <service
+            android:name=".background.BackgroundIntentService"
+            android:exported="false">
+        </service>
     </application>
 
 </manifest>

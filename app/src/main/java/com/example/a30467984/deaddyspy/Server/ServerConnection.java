@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.Switch;
 
@@ -174,8 +175,12 @@ public class ServerConnection extends Activity implements TaskCompleted{
                         try {
                             //jsonObj.put("phone2name",phone2Contact);
                             Intent i = new Intent(this.context, DisplayMapWithMarkers.class);
-                            i.putExtra("GroupLocation",connectionResponse.getMessage());
-                            i.putExtra("phone2ContactName",phone2Contact);
+                            Bundle extras = new Bundle();
+                            extras.putString("GroupLocation",connectionResponse.getMessage());
+                            extras.putSerializable("phone2ContactName", phone2Contact);
+                            i.putExtras(extras);
+                            //i.putExtra("GroupLocation",connectionResponse.getMessage());
+                            //i.putExtra("phone2ContactName",phone2Contact);
                             // Starts TargetActivity
                             this.context.startActivity(i);
                           //  singleToneAuthToen.setToken(jsonObj.get("token").toString());

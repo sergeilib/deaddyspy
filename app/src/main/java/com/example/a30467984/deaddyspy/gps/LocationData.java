@@ -108,7 +108,7 @@ public class LocationData extends Activity implements LocationListener {
                                     Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
                         // TODO: Consider calling
-                        ActivityCompat.requestPermissions(activity, new String[]
+                        ActivityCompat.requestPermissions((Activity) mContext, new String[]
                                 {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
                                 124);
 

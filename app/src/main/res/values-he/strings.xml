@@ -42,6 +42,11 @@
     <string name="group_conf">הגדרת קבוצות</string>
     <string name="group_list">רשימת קבוצות</string>
     <string name="new_group_text">קבוצה חדשה</string>
-    <string name="show_on_map">הצג על מפה</string>
+    <string name="show_on_map">הצג על המפה</string>
     <string name="location_sharing">שיטוף מיקום</string>
+    <string name="routine_configuration_title">הגדרת רוטינות</string>
+    <string name="routine_selected_paired_device">מכשיר מותאם שנבחר</string>
+    <string name="start_daddy_spy">הפעל daddy spy</string>
+    <string name="routine_name">שם הרוטינה</string>
+    <string name="start_hotspot">הפעל נקודה חמה</string>
 </resources>

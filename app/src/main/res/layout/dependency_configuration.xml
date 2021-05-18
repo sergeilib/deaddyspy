@@ -27,13 +27,12 @@
         android:id="@+id/dependencyButtonOK"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
         android:layout_marginStart="48dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
         android:text="@string/save"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/app_depend_relativeLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/deendancy_routine_button" />
 
     <RelativeLayout
         android:id="@+id/app_deppendancy_framelayout"
@@ -66,15 +65,14 @@
         android:id="@+id/dependency_cancel_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="72dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
         android:text="@string/cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/dependencyButtonOK"
-        app:layout_constraintTop_toBottomOf="@+id/app_depend_relativeLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/deendancy_routine_button" />
 
     <TextView
         android:id="@+id/textView3"
@@ -111,5 +109,17 @@
                 android:scrollbars="vertical"/>
 
     </RelativeLayout>
+
+    <Button
+        android:id="@+id/deendancy_routine_button"
+        android:layout_width="153dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="28dp"
+        android:text="routine"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/app_depend_relativeLayout"
+        app:layout_constraintVertical_bias="0.221" />
 
 </android.support.constraint.ConstraintLayout>

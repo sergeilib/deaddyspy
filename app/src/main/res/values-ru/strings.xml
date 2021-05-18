@@ -43,4 +43,10 @@
     <string name="group_conf">группы</string>
     <string name="group_list">Список групп</string>
     <string name="new_group_text">Новая группа</string>
+    <string name="show_on_map">показать на карте</string>
+    <string name="routine_configuration_title">Конфигурация рутинных настроек</string>
+    <string name="routine_selected_paired_device">выбранное сопряженное устройство</string>
+    <string name="start_daddy_spy">заппустить daddy spy</string>
+    <string name="routine_name">название рутины</string>
+    <string name="start_hotspot">"включить горячую точку "</string>
 </resources>

@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +26,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -37,6 +39,8 @@ import android.widget.Toast;
 
 import com.example.a30467984.deaddyspy.DAO.Point;
 import com.example.a30467984.deaddyspy.DAO.RoutingRepo;
+import com.example.a30467984.deaddyspy.DAO.Routins;
+import com.example.a30467984.deaddyspy.DAO.RoutinsRepo;
 import com.example.a30467984.deaddyspy.DAO.Settings;
 import com.example.a30467984.deaddyspy.DAO.SettingsRepo;
 import com.example.a30467984.deaddyspy.R;
@@ -69,6 +73,8 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
     private String appDependancyDB;
     private String selectedPairedDeviceName;
     private String selectedAppName;
+    private boolean DADDYSPY_BUTTON_CHANGE_FLAG = false;
+    private boolean HOTSPPOT_BUTTON_CHANGE_FLAG = false;
 
     int flags[] = {R.drawable.british_flag, R.drawable.israel_flag, R.drawable.russian_flag};
     final Context context = this;
@@ -419,6 +425,149 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
 
             }
         });
+
+        /////////////////////////////////////////////////////////////////////////////////
+        /// config routine
+        ///////////////////////////////////////////////////////////////////////////////
+        final Button routineOpenDialogButton = (Button) dialog.findViewById(R.id.deendancy_routine_button);
+        // if button is clicked, close the custom dialog
+        routineOpenDialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (selectedPairedDeviceName == null && selectedAppName == null){
+                    AlertDialog.Builder builder1 = new AlertDialog.Builder(SettingsManagerActivity.this);
+                    builder1.setMessage("Please select one of the pared devices or application");
+                    builder1.setCancelable(true);
+
+                    builder1.setPositiveButton(
+                            "OK",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+
+
+                                }
+                            });
+
+
+
+                    AlertDialog alert11 = builder1.create();
+                    alert11.show();
+
+                }else {
+                    final Dialog dialog = new Dialog(context);
+                    dialog.setContentView(R.layout.routine_configuration);
+                    final RoutinsRepo routinsRepo = new RoutinsRepo(context);
+                    final HashMap<String,Routins> pairedDeviceRoutines = routinsRepo.getRoutineByPairedDev(selectedPairedDeviceName);
+                    //dialog.setTitle("Title...");
+
+                    // set the custom dialog components - text, image and button
+
+                    TextView text = (TextView) dialog.findViewById(R.id.routine_selected_paired_dev);
+                    text.setText(selectedPairedDeviceName);
+                    dialog.show();
+                    CheckBox start_daddyCB = (CheckBox) dialog.findViewById(R.id.checkBox_start_daddyspy);
+
+                    CheckBox start_hotspotCB = (CheckBox) dialog.findViewById(R.id.checkbox_start_hotspot);
+
+                    if (pairedDeviceRoutines != null){
+                        for (String action : pairedDeviceRoutines.keySet()) {
+                            switch (action){
+                                case "hotspot":
+                                    start_hotspotCB.setChecked(true);
+                                    break;
+                                case "daddy_spy":
+                                    start_daddyCB.setChecked(true);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+
+                    start_daddyCB.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            //XOR
+                            DADDYSPY_BUTTON_CHANGE_FLAG = DADDYSPY_BUTTON_CHANGE_FLAG ^ true;
+                        }
+                    });
+
+                    start_hotspotCB.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // XOR
+                            HOTSPPOT_BUTTON_CHANGE_FLAG= HOTSPPOT_BUTTON_CHANGE_FLAG ^ true;
+                        }
+                    });
+                    ///////////////////////////////////////////////
+                    // Oppened dialog box
+                    ////////////////////////////////////////////////
+                    final Button routineDialogButtonSave = (Button) dialog.findViewById(R.id.button_save_routine);
+                    final Button routineDialogButtonCancel = (Button) dialog.findViewById(R.id.button_cancel_routine);
+                    routineDialogButtonSave.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                            Routins routins = new Routins();
+
+                            routins.setPaired_dev(selectedPairedDeviceName);
+                            CheckBox start_daddyCB = (CheckBox) dialog.findViewById(R.id.checkBox_start_daddyspy);
+                            start_daddyCB.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+
+                                }
+                            });
+                            CheckBox start_hotspotCB = (CheckBox) dialog.findViewById(R.id.checkbox_start_hotspot);
+
+                            if (selectedAppName != null){
+                                routins.setApp(selectedAppName);
+                            }
+                            if (selectedPairedDeviceName != null){
+                                routins.setPaired_dev(selectedPairedDeviceName);
+                            }
+
+                            /////////////////////////////////////////////////////////
+                            /// paired device handle hotspot
+                            if (HOTSPPOT_BUTTON_CHANGE_FLAG) {
+                                if (start_hotspotCB.isChecked()) {
+                                    routins.setAction("hotspot");
+                                    routinsRepo.insert(routins);
+
+                                }else{
+                                    routinsRepo.deleteByID(pairedDeviceRoutines.get("hotspot").getRoutins_ID());
+                                    //routinsRepo.deleteByName;
+                                }
+                                HOTSPPOT_BUTTON_CHANGE_FLAG = false;
+                            }
+                            //////////////////////////////////////////////////////////////////////
+                            ///////////////////////////////////////////////////////////////////
+                            ////  paired device handle start daddy spy
+                            if (DADDYSPY_BUTTON_CHANGE_FLAG) {
+                                if (start_daddyCB.isChecked()) {
+                                    routins.setAction("daddy_spy");
+                                    routinsRepo.insert(routins);
+                                } else {
+                                    routinsRepo.deleteByID(pairedDeviceRoutines.get("daddy_spy").getRoutins_ID());
+                                }
+                                DADDYSPY_BUTTON_CHANGE_FLAG = false;
+                            }
+                            ////////////////////////////////////////////
+                            dialog.dismiss();
+                        }
+                    });
+                    routineDialogButtonCancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                        }
+                    });
+
+                }
+            }
+        });
+
 
         ////////////////////////////////////////////////
         ///// SAVE DEPENDANCY
