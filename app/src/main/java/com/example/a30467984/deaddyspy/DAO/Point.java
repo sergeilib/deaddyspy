@@ -18,6 +18,7 @@ public class Point {
     public static final String KEY_limit = "speed_limit";
     public static final String KEY_date = "date";
     public static final String KEY_tripNum = "trip_number";
+    public static final String KEY_backup = "backup_flag";
     // property help us to keep data
     public int place_ID;
     public Double latitude;
@@ -27,4 +28,5 @@ public class Point {
     public String date;
     public String place;
     public int trip_number;
+    public int backup_flug;
 }

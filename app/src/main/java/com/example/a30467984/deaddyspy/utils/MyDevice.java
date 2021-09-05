@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
 
 import android.net.wifi.WifiManager;
@@ -141,40 +142,7 @@ public class MyDevice {
         return "+" + dialCoode + phone;
     }
 
-//    public String askForDevicePhoneNumber() {
-//        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this.context);
-//        alertDialog.setTitle("My Phone number");
-//        alertDialog.setMessage("Enter Phone number");
-//
-////        final EditText input = new EditText(context);
-////        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-////                LinearLayout.LayoutParams.MATCH_PARENT,
-////                LinearLayout.LayoutParams.MATCH_PARENT);
-////        input.setLayoutParams(lp);
-//        //alertDialog.setView();
-//        //alertDialog.setIcon(R.drawable.key);
-//
-//        alertDialog.setPositiveButton("YES",
-//                new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        //myDevicePhone = input.getText().toString();
-//                        //if (myDevicePhone.compareTo("") == 0) {
-//
-//                        //}
-//                    }
-//                });
-//
-//        alertDialog.setNegativeButton("NO",
-//                new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        dialog.cancel();
-//                    }
-//                });
-//
-//        alertDialog.show();
-//
-//        return myDevicePhone;
-//    }
+
 
     public String checkPhoneOnDisk(){
         SharedPreferences sharedPrefs = context.getSharedPreferences(
@@ -340,4 +308,12 @@ public class MyDevice {
         }
     }
 
+    public boolean checkIfWifiConnected(){
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo ni = cm.getActiveNetworkInfo();
+        if(ni!= null && ni.getType() == ConnectivityManager.TYPE_WIFI){
+            return true;
+        }
+        return false;
+    }
 }

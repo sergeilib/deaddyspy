@@ -22,6 +22,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -72,7 +73,9 @@ public class HistoryManagerActivity extends AppCompatActivity {
         }
         makeButtonsInvisible();
         FrameLayout historyFR = (FrameLayout) findViewById(R.id.historyFrameLayout);
-        LinearLayout tableBG = (LinearLayout) findViewById(R.id.table_background_layout);
+        //LinearLayout tableBG = (LinearLayout) findViewById(R.id.table_background_layout);
+        ScrollView scrollView = (ScrollView) findViewById(R.id.scrollTable);
+        scrollView.setVisibility(View.VISIBLE);
         TableLayout tl = (TableLayout) findViewById(R.id.ride_table);
         tl.setVisibility(View.VISIBLE);
 
@@ -97,7 +100,7 @@ public class HistoryManagerActivity extends AppCompatActivity {
     }
 
     public void buildTable(ArrayList tripData,TableLayout tl){
-        for (int i = 1; i < tripData.size();i++){
+        for (int i = 0; i < tripData.size();i++){
             HashMap<String,String> tmpData = (HashMap<String,String>) tripData.get(i);
             Set <String> key = tmpData.keySet();
             Iterator it = key.iterator();
@@ -220,7 +223,7 @@ public class HistoryManagerActivity extends AppCompatActivity {
         //final String[] listViewItems = new String[tripList.size()];
         final List<String> listViewItems = new ArrayList<String>();
         //show list in descendind order
-        for (int i = tripList.size()-1; i > 0; i--){
+        for (int i = tripList.size()-1; i >= 0; i--){
             HashMap<String,String> tmpData = (HashMap<String,String>) tripList.get(i);
 
             String a = tmpData.get("id");
@@ -277,15 +280,99 @@ public class HistoryManagerActivity extends AppCompatActivity {
 
     }
 
+    public void openHistoryListFromServer(View v) {
+        final ListView listview;
+        final ArrayList tripList = routingRepo.getStartingLocationList();
+        if (tripList.size() == 0){
+            Toast.makeText(HistoryManagerActivity.this, "No history was found on this device", Toast.LENGTH_LONG).show();
+            return;
+            //super.onBackPressed();
+        }
+        makeButtonsInvisible();
+        ConstraintLayout cl_history_list = (ConstraintLayout)findViewById(R.id.constraint_history_list);
+        cl_history_list.setVisibility(View.VISIBLE);
+        listview = (ListView)findViewById(R.id.history_list_view);
+        //listview.setVisibility(View.VISIBLE);
+        //final ArrayList tripList = routingRepo.getStartingLocationList();
+        //final String[] listViewItems = new String[tripList.size()];
+        final List<String> listViewItems = new ArrayList<String>();
+        //show list in descendind order
+        for (int i = tripList.size()-1; i >= 0; i--){
+            HashMap<String,String> tmpData = (HashMap<String,String>) tripList.get(i);
+
+            String a = tmpData.get("id");
+            listViewItems.add(tmpData.get("date"));
+
+//            LinearLayout.LayoutParams params = new TableLayout.LayoutParams(TableRow.LayoutParams.FILL_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
+//            params.setMargins(1,1,1,1);
+            // tl.addView(tr,params);
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>
+                (this,
+                        android.R.layout.simple_list_item_multiple_choice,
+                        listViewItems );
+
+        listview.setAdapter(adapter);
+
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // TODO Auto-generated method stub
+                rideList.clear();
+                sparseBooleanArray = listview.getCheckedItemPositions();
+
+                String ValueHolder = "" ;
+
+                int i = 0 ;
+
+                while (i < sparseBooleanArray.size()) {
+
+                    if (sparseBooleanArray.valueAt(i)) {
+
+                        ValueHolder += listViewItems.get(position) + ",";
+                        //int a = sparseBooleanArray.keyAt(i);
+                        //rideList.add(sparseBooleanArray.keyAt(i));
+
+                        HashMap<String,String> chosenData = (HashMap<String,String>) tripList.get(tripList.size()-1 - sparseBooleanArray.keyAt(i));
+                        String a = chosenData.get("trip_number");
+                        rideList.add(a);
+                    }
+
+                    i++ ;
+                }
+
+                ValueHolder = ValueHolder.replaceAll("(,)*$", "");
+//                HashMap<String,String> chosenData = (HashMap<String,String>) tripList.get(tripList.size()-1 - position);
+//                String a = chosenData.get("trip_number");
+//                rideList.add(a);
+                Toast.makeText(HistoryManagerActivity.this, "ListView Selected Values = " + ValueHolder , Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+    }
+
     public void makeButtonsInvisible(){
+        ConstraintLayout tableBG = (ConstraintLayout) findViewById(R.id.table_background_layout);
         Button last_ride_bt = findViewById(R.id.last_ride_button);
         Button history_list_bt = findViewById(R.id.history_list_button);
         last_ride_bt.setVisibility(View.GONE);
         history_list_bt.setVisibility(View.GONE);
+        Button server_last_ride_bt = findViewById(R.id.last_ride_on_server_button);
+        Button server_history_list_bt = findViewById(R.id.history_list_on_server_button);
+        server_last_ride_bt.setVisibility(View.GONE);
+        server_history_list_bt.setVisibility(View.GONE);
+        TextView device_tv = findViewById(R.id.textview_on_this_device_id);
+        device_tv.setVisibility(View.GONE);
+        TextView server_tv = findViewById(R.id.textview_on_server);
+        server_tv.setVisibility(View.GONE);
     }
     public void makeHistoryListInvisible(){
         ConstraintLayout history_list_bt = findViewById(R.id.constraint_history_list);
         history_list_bt.setVisibility(View.GONE);
+
     }
 
     public void openHistoryItem(View view){
@@ -294,13 +381,17 @@ public class HistoryManagerActivity extends AppCompatActivity {
             return;
         }
 
-        //makeButtonsInvisible();
+        makeButtonsInvisible();
         makeHistoryListInvisible();
         FrameLayout historyFR = (FrameLayout) findViewById(R.id.historyFrameLayout);
         //ConstraintLayout historyFR = (ConstraintLayout) findViewById(R.id.constraint_history_list);
-        LinearLayout tableBG = (LinearLayout) findViewById(R.id.table_background_layout);
+       // ConstraintLayout tableBG = (ConstraintLayout) findViewById(R.id.table_background_layout);
+        //tableBG.setVisibility(View.VISIBLE);
+        ScrollView scrollView = (ScrollView) findViewById(R.id.scrollTable);
+        scrollView.setVisibility(View.VISIBLE);
         TableLayout tl = (TableLayout) findViewById(R.id.ride_table);
         tl.setVisibility(View.VISIBLE);
+
 
         final ArrayList lasttripData = routingRepo.getLocationListByTripNumber(Integer.parseInt(rideList.get(0)));
         buildHeader(lasttripData, tl);

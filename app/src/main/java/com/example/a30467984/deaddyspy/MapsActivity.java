@@ -52,6 +52,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     @Override
                     public void onMapReady(GoogleMap googleMap) {
                         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                        if (rideData == null){
+                            return;
+                        }
                         for (int i = 1; i < rideData.size() - 1;i++) {
                             //  HashMap<String, String> tmpData = ((HashMap<String, String>) rideData.get(i)).get(Point.KEY_longitude);
                             String longitudeSrcStr = ((HashMap<String, String>) rideData.get(i)).get(Point.KEY_longitude);

@@ -49,4 +49,6 @@
     <string name="start_daddy_spy">הפעל daddy spy</string>
     <string name="routine_name">שם הרוטינה</string>
     <string name="start_hotspot">הפעל נקודה חמה</string>
+    <string name="backup_trip_history">גיבוי היסטורית הנסיעות</string>
+    <string name="backup_on_wifi_only">גיבוי רק עם חיבור WIFI</string>
 </resources>

@@ -3,6 +3,7 @@ package com.example.a30467984.deaddyspy.background;
 import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
@@ -20,6 +21,7 @@ import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.example.a30467984.deaddyspy.DAO.RoutingRepo;
 import com.example.a30467984.deaddyspy.DAO.Routins;
 import com.example.a30467984.deaddyspy.DAO.RoutinsRepo;
 import com.example.a30467984.deaddyspy.DAO.SettingsRepo;
@@ -31,6 +33,7 @@ import com.example.a30467984.deaddyspy.utils.AccessPointManager;
 import com.example.a30467984.deaddyspy.utils.MyDevice;
 import com.example.a30467984.deaddyspy.utils.SingleToneAuthToen;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,8 +41,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -57,6 +62,7 @@ public class BackgroundHandler {
         private final HashMap settingList;
         private MyDevice myDevice;
         public static boolean SETTINGS_CHANGE_FLAG = false;
+        private static int BACKUP_FLAG = 0;
 
         public BackgroundHandler(Context context, Activity activity ,int interval,String uuid){
             connectionResponse = new ConnectionResponse();
@@ -83,6 +89,7 @@ public class BackgroundHandler {
                     checkSharingLlocation(settingList);
                     //checkPairedDevicesConnected();
                     checkIfPairedDeviceConected();
+                    checkTripBackup(settingList);
                 }
             },interval);
 
@@ -103,7 +110,86 @@ public class BackgroundHandler {
             HashMap settingsList = settingsRepo.getSettingsList();
             return settingsList;
         }
+        ////////////////////////////////////////////////////////////////////////////////
+        ///// method check if trip history should be backuped,
+        //// check if connection should be wifi only and perform backup
+        //////////////////////////////////////////////////////////////////////////////////
+        private void checkTripBackup(HashMap settingList) {
+            if (settingList.containsKey("trip_backup")) {
+                if (SETTINGS_CHANGE_FLAG == true){
+                    settingList = getSettings();
+                    SETTINGS_CHANGE_FLAG = false;
+                }
 
+                String ifTripBackup = ((HashMap<String, String>) settingList.get("trip_backup")).get("value");
+                if (ifTripBackup.equals("true")) {
+                    String ifBackupWifitrue = ((HashMap<String, String>) settingList.get("backup_wifi_only")).get("value");
+                    if (ifBackupWifitrue.equals("true")){
+                        if (!checkConnectivityType().equals("WIFI")){
+                             Log.i("INFO","Can't backup trip data,no WIFI connection detected ");
+                             return;
+                        }
+                    }
+                    RoutingRepo routingRepo = new RoutingRepo(context);
+                    ArrayList<HashMap<String, String>> backupData = routingRepo.getLocationListByBackupFlag(BACKUP_FLAG);
+                   // ArrayList<HashMap<String, String>> backupData = routingRepo.getStartingLocationList();
+                    if(backupData.size() == 0){
+                        Log.i("INFO","Nothing to backup on server");
+                        return;
+                    }
+                    JSONObject jsonObject= new JSONObject();
+                    JSONArray innerJsonArray = new JSONArray();
+                    String android_id = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+                    HashMap keyHash = getTripHistoryFields();
+                    for (HashMap row: backupData) {
+                        Iterator<Map.Entry<String,String>> it = row.entrySet().iterator();
+                        JSONObject rowJsonObj = new JSONObject();
+                        while (it.hasNext()){
+                            Map.Entry<String,String> pair = it.next();
+                            try {
+                                String key = pair.getKey();
+                                if (keyHash.get(key) != null) {
+                                    rowJsonObj.put(keyHash.get(key).toString(), pair.getValue());
+                                } else{
+                                    continue;
+                                }
+                            }catch (JSONException e){
+                                e.printStackTrace();
+                            }
+                        }
+
+                        innerJsonArray.put(rowJsonObj);
+                    }
+                    try {
+                        jsonObject.put("data",innerJsonArray);
+                        //jsonObject.put("android_id",android_id);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    String phone = myDevice.getFullPhoneNumber();
+
+
+                        String url_suffix = "location/update_trip_history?android_id=" +  android_id;
+                        Object object = prepareConnectionObject(url_suffix,jsonObject);
+
+                        if (object != null) {
+                            try {
+                                updateServerTripBackup(object);
+                            } catch (Exception e) {
+                                Log.i("ERROR", "CHeckSharingLoocation" + e.getMessage());
+                            }
+                        } else {
+                            Log.i("INFO", "The token is NULL, Can't update location");
+                        }
+
+
+                }
+            }
+        }
+        /////////////////////////////////////////////////////////////////////////////
+        //// this method check if option "share location" is checked in settings,
+        //// and pass current location to server
+        ///////////////////////////////////////////////////////////////////////////
         public void checkSharingLlocation(HashMap settingList) {
             if (settingList.containsKey("sharing_location")) {
                 if (SETTINGS_CHANGE_FLAG == true){
@@ -120,7 +206,7 @@ public class BackgroundHandler {
                         String android_id = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
                         String url_suffix = "location/sharing_location?phone=" + phone + "&android_id=" +  android_id + "&last_longitude=" + longitude +
                                 "&last_latitude=" + latitude;
-                        Object object = prepareConnectionObject(url_suffix);
+                        Object object = prepareConnectionObject(url_suffix,null);
                         if(object != null) {
                             try {
                                 updateServerSharingLlocation(object);
@@ -172,7 +258,7 @@ public class BackgroundHandler {
         return finalLoc;
     }
 
-    public Object prepareConnectionObject(String url_suffix){
+    public Object prepareConnectionObject(String url_suffix,JSONObject body){
         Object[] object = new Object[2];
         URL url = null;
         try {
@@ -192,6 +278,14 @@ public class BackgroundHandler {
         }
         params.put("token", tkn);
         params.put("method", "POST");
+        if(body != null) {
+            try {
+                params.put("data", body.get("data").toString());
+                //params.put("android_id",body.get("android_id").toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
         object[1] = params;
         //JSONObject jsonObject = new JSONObject(params);
         // RequestHandler requestHandler = new RequestHandler();
@@ -213,6 +307,9 @@ public class BackgroundHandler {
 
     }
 
+    public void updateServerTripBackup(Object object){
+        serverConnection.updateDaddyServer(object);
+    }
     /*private JSONObject convertJson2Object(String json){
         try {
             JSONObject jsonObject = new JSONObject(json);
@@ -256,8 +353,31 @@ public class BackgroundHandler {
         }
         return true;
     }
+    public boolean check_if_wifi_backup_only(){
 
+        return true;
+    }
+
+    public String checkConnectivityType(){
+        MyDevice myDevice = new MyDevice(context,activity);
+        if(myDevice.checkIfWifiConnected()){
+            return "WIFI";
+        }
+        return "Other";
+    }
     public void checkPairedDevicesConnected() {
 
+    }
+
+    public HashMap getTripHistoryFields(){
+        HashMap convertKeys = new HashMap();
+        convertKeys.put("date","update_date");
+        convertKeys.put("trip_number","trip_number");
+        convertKeys.put("limit","speed_limit");
+        convertKeys.put("latitude","latitude");
+        convertKeys.put("longitude","longitude");
+        convertKeys.put("place","place");
+        convertKeys.put("speed","speed");
+        return convertKeys;
     }
 }

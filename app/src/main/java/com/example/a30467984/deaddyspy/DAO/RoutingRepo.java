@@ -34,6 +34,7 @@ public class RoutingRepo {
         values.put(Point.KEY_place, point.place);
         values.put(Point.KEY_tripNum, point.trip_number);
         values.put(Point.KEY_limit,point.limit);
+        values.put(Point.KEY_backup,0);
 
 
         // Inserting Row
@@ -62,9 +63,21 @@ public class RoutingRepo {
         values.put(Point.KEY_longitude, point.longitude);
         values.put(Point.KEY_latitude, point.latitude);
         values.put(Point.KEY_tripNum, point.trip_number);
-
+        values.put(Point.KEY_backup,0);
         // It's a good practice to use parameter ?, instead of concatenate string
         db.update(Point.TABLE, values, Point.KEY_ID + "= ?", new String[] { String.valueOf(point.place_ID) });
+        db.close(); // Closing database connection
+    }
+
+    public void updateBackupFlagByTrip(int trip_number) {
+
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+
+        values.put(Point.KEY_backup,1);
+        // It's a good practice to use parameter ?, instead of concatenate string
+        db.update(Point.TABLE, values, Point.KEY_backup + "= ?", new String[] { String.valueOf(trip_number) });
         db.close(); // Closing database connection
     }
 
@@ -79,7 +92,7 @@ public class RoutingRepo {
                 Point.KEY_longitude + "," +
                 Point.KEY_date + "," +
                 Point.KEY_tripNum + "," +
-
+                Point.KEY_backup  +
                 " FROM " + Point.TABLE;
 
         //Student student = new Student();
@@ -113,12 +126,13 @@ public class RoutingRepo {
                 Point.KEY_latitude + "," +
                 Point.KEY_longitude + "," +
                 Point.KEY_date + "," +
-                Point.KEY_tripNum +
+                Point.KEY_tripNum + "," +
+                Point.KEY_backup +
                 " FROM " + Point.TABLE
                 + " WHERE " +
                 Point.KEY_ID + "=?";// It's a good practice to use parameter ?, instead of concatenate string
 
-        int iCount =0;
+        int iCount = 0;
 
         Point location = new Point();
         Cursor cursor = db.rawQuery(selectQuery, new String[] { String.valueOf(Id) } );
@@ -133,6 +147,7 @@ public class RoutingRepo {
                 location.latitude =cursor.getDouble(cursor.getColumnIndex(Point.KEY_latitude));
                 location.latitude =cursor.getDouble(cursor.getColumnIndex(Point.KEY_longitude));
                 location.trip_number = cursor.getInt(cursor.getColumnIndex(Point.KEY_tripNum));
+                location.backup_flug = cursor.getInt(cursor.getColumnIndex(Point.KEY_backup));
             } while (cursor.moveToNext());
         }
 
@@ -151,7 +166,8 @@ public class RoutingRepo {
                 Point.KEY_longitude + "," +
                 Point.KEY_date + "," +
                 Point.KEY_place + "," +
-                Point.KEY_tripNum +
+                Point.KEY_tripNum + "," +
+                Point.KEY_backup +
 
                 " FROM " + Point.TABLE
                 + " WHERE " +
@@ -174,6 +190,55 @@ public class RoutingRepo {
                 location.put("place",cursor.getString(cursor.getColumnIndex(Point.KEY_place)));
                 location.put("speed",cursor.getString(cursor.getColumnIndex(Point.KEY_speed)));
                 location.put("trip_number",cursor.getString(cursor.getColumnIndex(Point.KEY_tripNum)));
+                location.put("backup_flag",cursor.getString(cursor.getColumnIndex(Point.KEY_backup)));
+//                student.put("name", cursor.getString(cursor.getColumnIndex(Location.KEY_name)));
+                locationList.add(location);
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return locationList;
+
+    }
+
+    public ArrayList<HashMap<String, String>> getLocationListByBackupFlag(int flag) {
+        //Open connection to read only
+        SQLiteDatabase db = databaseHelper.getReadableDatabase();
+        String selectQuery =  "SELECT  " +
+                Point.KEY_ID + "," +
+                Point.KEY_speed + "," +
+                Point.KEY_limit + "," +
+                Point.KEY_latitude + "," +
+                Point.KEY_longitude + "," +
+                Point.KEY_date + "," +
+                Point.KEY_place + "," +
+                Point.KEY_tripNum + "," +
+                Point.KEY_backup +
+
+                " FROM " + Point.TABLE
+                + " WHERE " +
+                Point.KEY_backup + "=?";
+
+        //Student student = new Student();
+        ArrayList<HashMap<String, String>> locationList = new ArrayList<HashMap<String, String>>();
+
+        Cursor cursor = db.rawQuery(selectQuery, new String[] {""+flag});
+        // looping through all rows and adding to list
+
+        if (cursor.moveToFirst()) {
+            do {
+                HashMap<String, String>  location= new HashMap<String, String>();
+                location.put("id", cursor.getString(cursor.getColumnIndex(Point.KEY_ID)));
+                location.put("longitude",cursor.getString(cursor.getColumnIndex(Point.KEY_longitude)));
+                location.put("latitude",cursor.getString(cursor.getColumnIndex(Point.KEY_latitude)));
+                location.put("date",cursor.getString(cursor.getColumnIndex(Point.KEY_date)));
+                location.put("limit",cursor.getString(cursor.getColumnIndex(Point.KEY_limit)));
+                location.put("place",cursor.getString(cursor.getColumnIndex(Point.KEY_place)));
+                location.put("speed",cursor.getString(cursor.getColumnIndex(Point.KEY_speed)));
+                location.put("trip_number",cursor.getString(cursor.getColumnIndex(Point.KEY_tripNum)));
+                location.put("backup_flag",cursor.getString(cursor.getColumnIndex(Point.KEY_backup)));
 //                student.put("name", cursor.getString(cursor.getColumnIndex(Location.KEY_name)));
                 locationList.add(location);
 
@@ -197,7 +262,8 @@ public class RoutingRepo {
                 Point.KEY_longitude + "," +
                 Point.KEY_date + "," +
                 Point.KEY_place + "," +
-                Point.KEY_tripNum +
+                Point.KEY_tripNum + "," +
+                Point.KEY_backup +
 
                 " FROM " + Point.TABLE
                 + " GROUP BY " +
@@ -220,6 +286,7 @@ public class RoutingRepo {
                 location.put("place",cursor.getString(cursor.getColumnIndex(Point.KEY_place)));
                 location.put("speed",cursor.getString(cursor.getColumnIndex(Point.KEY_speed)));
                 location.put("trip_number",cursor.getString(cursor.getColumnIndex(Point.KEY_tripNum)));
+                location.put("backup_flag",cursor.getString(cursor.getColumnIndex(Point.KEY_backup)));
 //                student.put("name", cursor.getString(cursor.getColumnIndex(Location.KEY_name)));
                 locationList.add(location);
 

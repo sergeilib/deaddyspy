@@ -22,6 +22,9 @@ public class Settings {
     public String type;
     ContentValues stringContentValues = new ContentValues();
 
+    //////////////////////////////////////////////////////////////////////////
+    //// initialization of settings defaults parameters
+    /////////////////////////////////////////////////////////////////////////
     public ContentValues getStringContentValues() {
         stringContentValues.put("language","english");
         stringContentValues.put("scale","km");
@@ -30,6 +33,8 @@ public class Settings {
         stringContentValues.put("app_depend","");
         stringContentValues.put("alert_activity","false");
         stringContentValues.put("sharing_location","false");
+        stringContentValues.put("trip_backup","false");
+        stringContentValues.put("backup_wifi_only","true");
         return stringContentValues;
     }
     public void setStringContentValues(String param,String value){

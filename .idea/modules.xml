@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/DeaddySpy.iml" filepath="$PROJECT_DIR$/DeaddySpy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/StudioProjects-deaddyspy.iml" filepath="$PROJECT_DIR$/.idea/modules/StudioProjects-deaddyspy.iml" group="deaddyspy" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/StudioProjects-deaddyspy-app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/StudioProjects-deaddyspy-app.iml" group="deaddyspy/app" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/deaddyspy.iml" filepath="$PROJECT_DIR$/.idea/modules/deaddyspy.iml" group="deaddyspy" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/deaddyspy-app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/deaddyspy-app.iml" group="deaddyspy/app" />

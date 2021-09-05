@@ -19,7 +19,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //version number to upgrade database version
     //each time if you Add, Edit table, you need to change the
     //version number.
-    private static final int DATABASE_VERSION = 11;
+    private static final int DATABASE_VERSION = 12;
 
     public DatabaseHelper(Context context ) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -37,7 +37,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + Point.KEY_place + " TEXT, "
                 + Point.KEY_longitude + " DOUBLE, "
                 + Point.KEY_latitude + " DOUBLE, "
-                + Point.KEY_tripNum + " INTEGER  )";
+                + Point.KEY_tripNum + " INTEGER, "
+                + Point.KEY_backup + " INTEGER)";
 
         db.execSQL(CREATE_LOCATION_TABLE);
 

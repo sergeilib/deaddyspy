@@ -102,6 +102,8 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
         displaySpeedUnit(settingsList);
         displayRecordParam(settingsList);
         displaySharingLlocation(settingsList);
+        displayBackupTrip(settingsList);
+        displayBackupWifiOnly(settingsList);
 
     }
 
@@ -203,14 +205,14 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
 
     public void updateSharingLocation(View v) {
         Switch sw = (Switch) findViewById(R.id.location_sharing_switch);
-        MyDevice myDevice = new MyDevice(context,SettingsManagerActivity.this);
+        MyDevice myDevice = new MyDevice(context, SettingsManagerActivity.this);
         if (sw.isChecked()) {
             if (myDevice.getFullPhoneNumber() != null) {
 
                 settingsRepo.updateSettings("sharing_location", "true");
                 BackgroundHandler.SETTINGS_CHANGE_FLAG = true;
                 Toast.makeText(SettingsManagerActivity.this, "Allow sharing location", Toast.LENGTH_SHORT).show();
-            }else{
+            } else {
                 String phone = askForDevicePhoneNumber(myDevice);
                 Toast.makeText(SettingsManagerActivity.this, "Phone not found", Toast.LENGTH_SHORT).show();
             }
@@ -218,6 +220,67 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
             settingsRepo.updateSettings("sharing_location", "false");
             BackgroundHandler.SETTINGS_CHANGE_FLAG = true;
             Toast.makeText(SettingsManagerActivity.this, "Cancel sharing location", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void displayBackupTrip(HashMap settingsList) {
+        if (settingsList.containsKey("trip_backup")) {
+            Switch sw = (Switch) findViewById(R.id.trip_backup_history_switch);
+
+            String unit = ((HashMap<String, String>) settingsList.get("trip_backup")).get("value");
+            if (unit.equals("true")) {
+                sw.setChecked(true);
+
+            } else {
+                sw.setChecked(false);
+            }
+        }
+    }
+
+    public void backupTripHistory(View v) {
+        Switch sw = (Switch) findViewById(R.id.trip_backup_history_switch);
+
+        if (sw.isChecked()) {
+
+
+            settingsRepo.updateSettings("trip_backup", "true");
+            BackgroundHandler.SETTINGS_CHANGE_FLAG = true;
+            Toast.makeText(SettingsManagerActivity.this, "Allow trip history backup", Toast.LENGTH_SHORT).show();
+
+        } else {
+            settingsRepo.updateSettings("trip_backup", "false");
+            BackgroundHandler.SETTINGS_CHANGE_FLAG = true;
+            Toast.makeText(SettingsManagerActivity.this, "Cancel trip history backup", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void displayBackupWifiOnly(HashMap settingsList) {
+        if (settingsList.containsKey("backup_wifi_only")) {
+            Switch sw = (Switch) findViewById(R.id.backup_wifi_only_switch);
+
+            String unit = ((HashMap<String, String>) settingsList.get("backup_wifi_only")).get("value");
+            if (unit.equals("true")) {
+                sw.setChecked(true);
+
+            } else {
+                sw.setChecked(false);
+            }
+        }
+    }
+    public void backupWifiOnlyUpdate(View v) {
+        Switch sw = (Switch) findViewById(R.id.backup_wifi_only_switch);
+
+        if (sw.isChecked()) {
+
+
+            settingsRepo.updateSettings("backup_wifi_only", "true");
+            BackgroundHandler.SETTINGS_CHANGE_FLAG = true;
+            Toast.makeText(SettingsManagerActivity.this, "Allow backup wifi only", Toast.LENGTH_SHORT).show();
+
+        } else {
+            settingsRepo.updateSettings("backup_wifi_only", "false");
+            BackgroundHandler.SETTINGS_CHANGE_FLAG = true;
+            Toast.makeText(SettingsManagerActivity.this, "Cancel backup wifi only", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -241,7 +304,7 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
                         //if (myDevicePhone.compareTo("") == 0) {
 
                         //}
-                          myDevice.savePhoneOnDisk(input.getText().toString());
+                        myDevice.savePhoneOnDisk(input.getText().toString());
                     }
                 });
 
@@ -300,16 +363,17 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
         // TODO Auto-generated method stub
     }
 
-    public void openAlertActivity(View view){
+    public void openAlertActivity(View view) {
         Intent i = new Intent(this, AlertManagerActivity.class);
         //i.putExtra("RideData", rideData);
         // Starts TargetActivity
         startActivity(i);
     }
+
     /////////////////////////////////////////////////////////////////////////
     /////// DEPENDANCY SECTON
     ////////////////////////////////
-    public void openDependencyActivity(View view){
+    public void openDependencyActivity(View view) {
         // Intent i = new Intent(this, AlertManagerActivity.class);
         //i.putExtra("RideData", rideData);
         // Starts TargetActivity
@@ -327,7 +391,7 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
             for (BluetoothDevice device : pairedDevices) {
                 String deviceName = device.getName();
 
-                if (pairedDevicesDB != null && pairedDevices.equals(deviceName)){
+                if (pairedDevicesDB != null && pairedDevices.equals(deviceName)) {
                     deviceName = deviceName + " (V)";
                 }
 
@@ -335,22 +399,22 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
                 pairedDevicesString.add(deviceName);
             }
         }
-            final Dialog dialog = new Dialog(context);
-            dialog.setContentView(R.layout.dependency_configuration);
-            //// in order dialog will not disapear in rotation , make orientation as portrait
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            /////////////////////////////////////////////////////////////////////
-            ListView pairedlistView = (ListView)dialog.findViewById(R.id.ppaired_dependency_window_list);
-            //GridView appDependListView = (GridView)dialog.findViewById(R.id.app_deppend_greedview);
-            //dialog.setTitle("Title...");
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.dependency_configuration);
+        //// in order dialog will not disapear in rotation , make orientation as portrait
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        /////////////////////////////////////////////////////////////////////
+        ListView pairedlistView = (ListView) dialog.findViewById(R.id.ppaired_dependency_window_list);
+        //GridView appDependListView = (GridView)dialog.findViewById(R.id.app_deppend_greedview);
+        //dialog.setTitle("Title...");
 
-            // set the custom dialog components - text, image and button
-            //       TextView text = (TextView) dialog.findViewById(R.id.text);
+        // set the custom dialog components - text, image and button
+        //       TextView text = (TextView) dialog.findViewById(R.id.text);
 //        text.setText("Android custom dialog example!");
-            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,  pairedDevicesString){
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, pairedDevicesString) {
             @Override
-            public View getView (int position, View convertView, ViewGroup parent){
-                View view =super.getView(position,convertView,parent);
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
                 pairedDependencyLayoutParams = view.getLayoutParams();
                 pairedDependencyLayoutParams.height = 120;
                 view.setLayoutParams(pairedDependencyLayoutParams);
@@ -365,7 +429,7 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
             @Override
             public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
                 final String item = (String) parent.getItemAtPosition(position);
-                if (!item.equals(pairedDevicesDB+ " (V)")) {
+                if (!item.equals(pairedDevicesDB + " (V)")) {
                     selectedPairedDeviceName = item;
                     Toast.makeText(context, item + "", Toast.LENGTH_SHORT).show();
                     //settingsRepo.updateSettings("paired_depend", item);
@@ -383,28 +447,28 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
         final Drawable[] appsImages = new Drawable[installedApps.size()];
         final String[] appsNames = new String[installedApps.size()];
         int appCounter = 0;
-        for(AppList app: installedApps){
+        for (AppList app : installedApps) {
             appsImages[appCounter] = app.getIcon();
             appsNames[appCounter] = app.getName();
             appCounter++;//app.getIcon();
         }
-        GridView appDependListView = (GridView)dialog.findViewById(R.id.app_deppend_greedview);
-        ArrayAdapter<AppList> appsInstaledarrayAdapter = new ArrayAdapter<AppList>(this, android.R.layout.simple_list_item_1,  installedApps){
+        GridView appDependListView = (GridView) dialog.findViewById(R.id.app_deppend_greedview);
+        ArrayAdapter<AppList> appsInstaledarrayAdapter = new ArrayAdapter<AppList>(this, android.R.layout.simple_list_item_1, installedApps) {
             @Override
-            public View getView (int position, View convertView, ViewGroup parent){
+            public View getView(int position, View convertView, ViewGroup parent) {
 //                View view =super.getView(position,convertView,parent);
 //                pairedDependencyLayoutParams = view.getLayoutParams();
 //                pairedDependencyLayoutParams.height = 120;
 //                view.setLayoutParams(pairedDependencyLayoutParams);
 //                return view;
                 ImageView imageView;
-                if(convertView==null) {
+                if (convertView == null) {
                     imageView = new ImageView(context);
                     imageView.setLayoutParams(new GridView.LayoutParams(200, 200));
                     imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                     imageView.setPadding(8, 20, 8, 20);
-                }else{
-                    imageView=(ImageView)convertView;
+                } else {
+                    imageView = (ImageView) convertView;
                 }
                 imageView.setImageDrawable(appsImages[position]);
                 return imageView;
@@ -416,7 +480,7 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
             @Override
             public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
                 final String item = (String) parent.getItemAtPosition(position).toString();
-   //             final String item = (String) parent.getSelectedItem();
+                //             final String item = (String) parent.getSelectedItem();
                 String selectedAppName = appsNames[position];
                 Toast.makeText(context, selectedAppName + "", Toast.LENGTH_SHORT).show();
                 //settingsRepo.updateSettings("app_depend", selectedAppName);
@@ -434,7 +498,7 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
         routineOpenDialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (selectedPairedDeviceName == null && selectedAppName == null){
+                if (selectedPairedDeviceName == null && selectedAppName == null) {
                     AlertDialog.Builder builder1 = new AlertDialog.Builder(SettingsManagerActivity.this);
                     builder1.setMessage("Please select one of the pared devices or application");
                     builder1.setCancelable(true);
@@ -450,15 +514,14 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
                             });
 
 
-
                     AlertDialog alert11 = builder1.create();
                     alert11.show();
 
-                }else {
+                } else {
                     final Dialog dialog = new Dialog(context);
                     dialog.setContentView(R.layout.routine_configuration);
                     final RoutinsRepo routinsRepo = new RoutinsRepo(context);
-                    final HashMap<String,Routins> pairedDeviceRoutines = routinsRepo.getRoutineByPairedDev(selectedPairedDeviceName);
+                    final HashMap<String, Routins> pairedDeviceRoutines = routinsRepo.getRoutineByPairedDev(selectedPairedDeviceName);
                     //dialog.setTitle("Title...");
 
                     // set the custom dialog components - text, image and button
@@ -470,9 +533,9 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
 
                     CheckBox start_hotspotCB = (CheckBox) dialog.findViewById(R.id.checkbox_start_hotspot);
 
-                    if (pairedDeviceRoutines != null){
+                    if (pairedDeviceRoutines != null) {
                         for (String action : pairedDeviceRoutines.keySet()) {
-                            switch (action){
+                            switch (action) {
                                 case "hotspot":
                                     start_hotspotCB.setChecked(true);
                                     break;
@@ -497,7 +560,7 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
                         @Override
                         public void onClick(View v) {
                             // XOR
-                            HOTSPPOT_BUTTON_CHANGE_FLAG= HOTSPPOT_BUTTON_CHANGE_FLAG ^ true;
+                            HOTSPPOT_BUTTON_CHANGE_FLAG = HOTSPPOT_BUTTON_CHANGE_FLAG ^ true;
                         }
                     });
                     ///////////////////////////////////////////////
@@ -521,10 +584,10 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
                             });
                             CheckBox start_hotspotCB = (CheckBox) dialog.findViewById(R.id.checkbox_start_hotspot);
 
-                            if (selectedAppName != null){
+                            if (selectedAppName != null) {
                                 routins.setApp(selectedAppName);
                             }
-                            if (selectedPairedDeviceName != null){
+                            if (selectedPairedDeviceName != null) {
                                 routins.setPaired_dev(selectedPairedDeviceName);
                             }
 
@@ -535,7 +598,7 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
                                     routins.setAction("hotspot");
                                     routinsRepo.insert(routins);
 
-                                }else{
+                                } else {
                                     routinsRepo.deleteByID(pairedDeviceRoutines.get("hotspot").getRoutins_ID());
                                     //routinsRepo.deleteByName;
                                 }
@@ -577,7 +640,7 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
         dependDialogButtonSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!selectedPairedDeviceName.equals(pairedDevicesDB+ " (V)")) {
+                if (!selectedPairedDeviceName.equals(pairedDevicesDB + " (V)")) {
                     settingsRepo.updateSettings("paired_depend", selectedPairedDeviceName);
 
                 }
@@ -625,15 +688,16 @@ public class SettingsManagerActivity extends AppCompatActivity implements Adapte
     private boolean isSystemPackage(PackageInfo pkgInfo) {
         return ((pkgInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) ? true : false;
     }
-    private void initializateDependancyParams(HashMap settingsList){
+
+    private void initializateDependancyParams(HashMap settingsList) {
         if (settingsList.containsKey("paired_depend")) {
             pairedDevicesDB = ((HashMap<String, String>) settingsList.get("paired_depend")).get("value");
-        }else{
+        } else {
             pairedDevicesDB = null;
         }
         if (settingsList.containsKey("app_depend")) {
             pairedDevicesDB = ((HashMap<String, String>) settingsList.get("app_depend")).get("value");
-        }else{
+        } else {
             pairedDevicesDB = null;
         }
     }

@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         appServerInit();
 //        MyDevice myDevice = new MyDevice(this,activity);
 //        myDevice.setWifiApState(this);
-        //goToBackground();
+        goToBackground();
         scheduleAlarm();
 
 
@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void appServerInit() {
+    public void appServerInit() {
 
         getUniqId(getBaseContext());
         SingleToneAuthToen singleToneAuthToen = SingleToneAuthToen.getInstance();
@@ -458,7 +458,7 @@ public class MainActivity extends AppCompatActivity {
     ////// for establish session
     /////////////////////////////////////////////////////////////////////////////
 
-    private void connectionInit(){
+    public void connectionInit(){
         try {
             Object[] object = new Object[2];
             URL url = new URL(path + "get_tmp_tkn");
@@ -467,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
             HashMap<String,String> params = new HashMap<>();
             //params.put("url",path + "first_register");
             //params.put("method","POST");
-            SharedPreferences sharedPrefs = getBaseContext().getSharedPreferences(
+            SharedPreferences sharedPrefs = getApplicationContext().getSharedPreferences(
                     PREF_MY_DADDY, Context.MODE_PRIVATE);
 
             String tkn = sharedPrefs.getString(AUTH_TKN,null);

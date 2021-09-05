@@ -7,7 +7,7 @@
 
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/textView7"
         android:layout_width="107dp"
         android:layout_height="16dp"
         android:layout_marginStart="8dp"
@@ -20,7 +20,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ListView
-        android:id="@+id/contacts_list_listview"
+        android:id="@+id/phones_per_contacts_listview"
         android:layout_width="333dp"
         android:layout_height="624dp"
         android:layout_marginStart="8dp"
@@ -28,16 +28,14 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:choiceMode="multipleChoice"
         android:text=""
-
         android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"></ListView>
 
-    <Button
-        android:id="@+id/contact_select_cancel"
+    <!--<Button
+        android:id="@+id/contact_select1_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="36dp"
@@ -46,19 +44,19 @@
         android:text="@string/cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/contacts_list_listview"
+        app:layout_constraintTop_toBottomOf="@+id/phones_per_contacts_listview"
         app:layout_constraintVertical_bias="0.514" />
 
     <Button
-        android:id="@+id/contact_select_ok"
+        android:id="@+id/contact_select1_ok"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/add"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.804"
-        app:layout_constraintStart_toEndOf="@+id/contact_select_cancel"
-        app:layout_constraintTop_toBottomOf="@+id/contacts_list_listview"
-        app:layout_constraintVertical_bias="0.352" />
+        app:layout_constraintStart_toEndOf="@+id/contact_select1_cancel"
+        app:layout_constraintTop_toBottomOf="@+id/phones_per_contacts_listview"
+        app:layout_constraintVertical_bias="0.352" />-->
 
 </android.support.constraint.ConstraintLayout>

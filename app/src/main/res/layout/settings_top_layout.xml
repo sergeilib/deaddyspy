@@ -52,7 +52,30 @@
         android:textOff="Mile/h"
         android:textOn="km/h"
         android:track="@drawable/switch_track_custom" />
-
+    <Switch
+        android:id="@+id/trip_backup_history_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/switch_button_bg"
+        android:checked="false"
+        android:onClick="backupTripHistory"
+        android:paddingLeft="10dp"
+        android:text="@string/backup_trip_history"
+        android:textOff="Mile/h"
+        android:textOn="km/h"
+        android:track="@drawable/switch_track_custom" />
+    <Switch
+        android:id="@+id/backup_wifi_only_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/switch_button_bg"
+        android:checked="false"
+        android:onClick="backupWifiOnlyUpdate"
+        android:paddingLeft="10dp"
+        android:text="@string/backup_on_wifi_only"
+        android:textOff="Mile/h"
+        android:textOn="km/h"
+        android:track="@drawable/switch_track_custom" />
     <Button
         android:id="@+id/config_ntification_button"
         android:layout_width="match_parent"

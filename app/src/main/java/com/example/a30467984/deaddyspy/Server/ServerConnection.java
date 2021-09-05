@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import com.example.a30467984.deaddyspy.MapsActivity;
 import com.example.a30467984.deaddyspy.gps.LocationData;
@@ -141,6 +142,39 @@ public class ServerConnection extends Activity implements TaskCompleted{
         }
     }
 
+    public void getNumberOfTripsFromServer(Object object){
+        Log.i("INFO","SUBJECT getAuthRequest: " + object.toString());
+        new ServerAsyncConnection(ServerConnection.this).execute(object);
+        for (int sec = 0 ; sec < 10 ; sec++){
+            try {
+                Thread.sleep(1000);
+                Log.i("INFO","ITERATION:" + sec );
+                if (connectionResponse.getStatus() != null) {
+                    if (connectionResponse.getStatus().equals("failure")){
+                        Log.i("INFO",connectionResponse.getError()  );
+                        break;
+                    }else {
+
+                        JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
+                        SingleToneAuthToen singleToneAuthToen = SingleToneAuthToen.getInstance();
+                        try {
+                            singleToneAuthToen.setToken(jsonObj.get("token").toString());
+                        } catch (JSONException e) {
+                            Log.i("ERROR", e.getMessage());
+                        }
+                        break;
+                    }
+                    //JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
+                }else{
+
+                }
+            }catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+
     public void updateDaddyServer(Object object){
         Log.i("INFO","SUBJECT updateDaddyServer: " + object.toString());
 
@@ -155,11 +189,13 @@ public class ServerConnection extends Activity implements TaskCompleted{
         }
     }
 
+
+
     public void getGroupLocation(Object object, HashMap phone2Contact){
         new ServerAsyncConnection(ServerConnection.this).execute(object);
-
+        boolean connection_flag = false;
         //JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
-        for (int sec = 0 ; sec < 10 ; sec++){
+        for (int sec = 0 ; sec < 3 ; sec++){
             try {
                 Thread.sleep(1000);
                 Log.i("INFO","ITERATION:" + sec );
@@ -168,7 +204,7 @@ public class ServerConnection extends Activity implements TaskCompleted{
                         Log.i("INFO",connectionResponse.getError()  );
                         break;
                     }else {
-
+                        connection_flag = true;
                         JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
 
                         //SingleToneAuthToen singleToneAuthToen = SingleToneAuthToen.getInstance();
@@ -198,7 +234,9 @@ public class ServerConnection extends Activity implements TaskCompleted{
             }
 
         }
-
+        if(connection_flag == false ) {
+            Toast.makeText(context, "Can't fetch groups location from server", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private JSONObject convertJson2Object(String json){
@@ -257,8 +295,13 @@ public class ServerConnection extends Activity implements TaskCompleted{
             try {
                 String postResponseStr = requestHandler.sendMethod((URL) obj[0], jsonObject, params.get("method"));
                 Log.i("INFO","RESPONSE" + postResponseStr);
-                postResponse.put("status","success");
-                postResponse.put("message",postResponseStr);
+                if(postResponseStr != null) {
+                    postResponse.put("status", "success");
+                    postResponse.put("message", postResponseStr);
+                }else{
+                    postResponse.put("status","failure");
+                    postResponse.put("error","No response from server");
+                }
 
             }catch (Exception e){
                 Log.i("ERROR",e.getMessage());
