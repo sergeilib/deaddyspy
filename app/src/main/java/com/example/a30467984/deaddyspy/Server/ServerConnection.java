@@ -18,6 +18,7 @@ import com.example.a30467984.deaddyspy.modules.ConnectionResponse;
 import com.example.a30467984.deaddyspy.modules.TaskCompleted;
 import com.example.a30467984.deaddyspy.utils.RequestHandler;
 import com.example.a30467984.deaddyspy.utils.SingleToneAuthToen;
+import com.example.a30467984.deaddyspy.utils.SingleToneServerListOfTrips;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -154,15 +155,22 @@ public class ServerConnection extends Activity implements TaskCompleted{
                         Log.i("INFO",connectionResponse.getError()  );
                         break;
                     }else {
-
+                        HashMap listOfTrips = new HashMap();
                         JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
-                        SingleToneAuthToen singleToneAuthToen = SingleToneAuthToen.getInstance();
-                        try {
-                            singleToneAuthToen.setToken(jsonObj.get("token").toString());
-                        } catch (JSONException e) {
-                            Log.i("ERROR", e.getMessage());
+                        SingleToneServerListOfTrips singleToneServerListOfTrips = SingleToneServerListOfTrips.getInstance();
+                        for (int i = 0; i < jsonObj.length(); i++) {
+
+
+                            try {
+                                listOfTrips.put(jsonObj.get("trip_number").toString(), jsonObj.get("update_date").toString());
+
+
+                            } catch (JSONException e) {
+                                Log.i("ERROR", e.getMessage());
+                            }
+                            singleToneServerListOfTrips.setListOfTrips(listOfTrips);
+                            break;
                         }
-                        break;
                     }
                     //JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
                 }else{

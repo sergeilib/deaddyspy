@@ -34,9 +34,15 @@ import com.example.a30467984.deaddyspy.DAO.Settings;
 import com.example.a30467984.deaddyspy.DAO.SettingsRepo;
 import com.example.a30467984.deaddyspy.gps.LocationData;
 import com.example.a30467984.deaddyspy.utils.CsvCreator;
+import com.example.a30467984.deaddyspy.utils.SingleToneAuthToen;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.lang.reflect.Array;
 import java.net.FileNameMap;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -51,6 +57,7 @@ import static android.view.Gravity.BOTTOM;
  */
 
 public class HistoryManagerActivity extends AppCompatActivity {
+    private String path = "https://li780-236.members.linode.com:443/api/";
     private List<String> fieldList = Arrays.asList("date", "speed","limit","latitude","longitude","place");
     RoutingRepo routingRepo = new RoutingRepo(this);
     ArrayList<String> rideList = new ArrayList<String>();
@@ -279,12 +286,29 @@ public class HistoryManagerActivity extends AppCompatActivity {
         });
 
     }
-
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //// This function get list of trips from the server and display it on screen
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void openHistoryListFromServer(View v) {
         final ListView listview;
+        String android_id = android.provider.Settings.Secure.getString(this.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+        String url_suffix = "location/get_trip_list?android_id=" +  android_id;
+        Object object = prepareConnectionObject(url_suffix,null);
+
+        if (object != null) {
+            try {
+         //       updateServerTripBackup(object);
+
+            } catch (Exception e) {
+                Log.i("ERROR", "CHeckSharingLoocation" + e.getMessage());
+            }
+        } else {
+            Log.i("INFO", "The token is NULL, Can't update location");
+        }
         final ArrayList tripList = routingRepo.getStartingLocationList();
+        
         if (tripList.size() == 0){
-            Toast.makeText(HistoryManagerActivity.this, "No history was found on this device", Toast.LENGTH_LONG).show();
+            Toast.makeText(HistoryManagerActivity.this, "No history was found on server", Toast.LENGTH_LONG).show();
             return;
             //super.onBackPressed();
         }
@@ -480,5 +504,48 @@ public class HistoryManagerActivity extends AppCompatActivity {
         // Starts TargetActivity
         startActivity(i);
 
+    }
+
+    public Object prepareConnectionObject(String url_suffix, JSONObject body){
+        Object[] object = new Object[2];
+        URL url = null;
+        try {
+            url = new URL(path + url_suffix);
+        }catch (MalformedURLException m){
+            Log.i("ERR",m.getMessage());
+        }
+        object[0] = url;
+
+        HashMap<String,String> params = new HashMap<>();
+
+        String tkn = getSessionToken();
+        if (tkn == null){
+            //ServerConnection serverConnection = new ServerConnection(context, activity);
+            //serverConnection.getAuthRequest(object);
+            return null;
+        }
+        params.put("token", tkn);
+        params.put("method", "POST");
+        if(body != null) {
+            try {
+                params.put("data", body.get("data").toString());
+                //params.put("android_id",body.get("android_id").toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        object[1] = params;
+        //JSONObject jsonObject = new JSONObject(params);
+        // RequestHandler requestHandler = new RequestHandler();
+        //requestHandler.sendPost(url,jsonObject);
+        //ServerConnection serverConnection = new ServerConnection(context, activity);
+        //serverConnection.getAuthRequest(object);
+        return object;
+    }
+
+    public String getSessionToken(){
+        SingleToneAuthToen singleToneAuthToen = SingleToneAuthToen.getInstance();
+
+        return singleToneAuthToen.getToken();
     }
 }

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    android:id="@+id/daddy_spy_first_framelayout"
+<FrameLayout android:id="@+id/daddy_spy_first_framelayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
 
 
@@ -13,7 +13,7 @@
         android:id="@+id/daddy_spy_first_constraint_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible"
+        android:visibility="visible"
         tools:context="com.example.a30467984.deaddyspy.MainActivity">
 
 
@@ -77,20 +77,6 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/main_button_history" />
 
-</android.support.constraint.ConstraintLayout>
-    <FrameLayout
-        android:id="@+id/text_frame_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center">
-    <TextView
-        android:id="@+id/first_layout_text"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="DADDY SPY"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="50dp"
-        android:visibility="visible" />
-    </FrameLayout>
+    </android.support.constraint.ConstraintLayout>
+
 </FrameLayout>
