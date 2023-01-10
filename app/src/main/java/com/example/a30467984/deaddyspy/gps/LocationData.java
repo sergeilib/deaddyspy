@@ -28,6 +28,10 @@ import com.example.a30467984.deaddyspy.R;
 import com.example.a30467984.deaddyspy.ShowSpeedometer;
 import com.example.a30467984.deaddyspy.alert.AlertTools;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.lang.reflect.Array;
 import java.util.HashMap;
 
 /**
@@ -59,13 +63,13 @@ public class LocationData extends Activity implements LocationListener {
     protected LocationManager locationManager;
 
 
-
     protected OpenStreetMap openStreetMap;
     public static String currentAddress;
     public static int currentMaxSppeed = 0;
     public static String lastState = "good";
-    public static HashMap<String,String> currentLocation;
-    private AlertTools alertTools ;
+    public static HashMap<String, String> currentLocation;
+    private AlertTools alertTools;
+    private double[] boundingArray = new double[4];
 
 
     public LocationData(Context mContext, HashMap settingsList, Activity activity, int currentRideNum) {
@@ -74,8 +78,8 @@ public class LocationData extends Activity implements LocationListener {
         this.activity = activity;
         this.counter = 1;
         this.currentRideNum = currentRideNum;
-        openStreetMap = new OpenStreetMap(mContext,activity);
-        alertTools = new AlertTools(this.mContext,this.activity);
+        openStreetMap = new OpenStreetMap(mContext, activity);
+        alertTools = new AlertTools(this.mContext, this.activity);
         currentLocation = new HashMap<String, String>();
         getLocation();
     }
@@ -109,7 +113,7 @@ public class LocationData extends Activity implements LocationListener {
 
                         // TODO: Consider calling
                         ActivityCompat.requestPermissions((Activity) mContext, new String[]
-                                {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                                        {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
                                 124);
 
 
@@ -134,7 +138,7 @@ public class LocationData extends Activity implements LocationListener {
                     }
 
 
-                }else{
+                } else {
                     TextView textView_gps_signal = (TextView) activity.findViewById(R.id.no_gps_signal);
                     textView_gps_signal.setVisibility(View.VISIBLE);
                 }
@@ -199,12 +203,14 @@ public class LocationData extends Activity implements LocationListener {
         }
         return (int) speed;
     }
-    public double getAccuracy(){
-        if(loc != null){
+
+    public double getAccuracy() {
+        if (loc != null) {
             accuracy = loc.getAccuracy();
         }
         return accuracy;
     }
+
     public boolean canGetLocation() {
         return this.canGetLocation;
     }
@@ -262,7 +268,7 @@ public class LocationData extends Activity implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         try {
-            if (this.activity == null){
+            if (this.activity == null) {
                 return;
             }
             TextView textView_gps_signal = (TextView) this.activity.findViewById(R.id.no_gps_signal);
@@ -275,19 +281,19 @@ public class LocationData extends Activity implements LocationListener {
 
             Settings settings = new Settings();
             SettingsRepo settingsRepo = new SettingsRepo(this);
-                //settingsList = settingsRepo.getSettingsList();
+            //settingsList = settingsRepo.getSettingsList();
             RoutingRepo routingRepo = new RoutingRepo(mContext);
             Point point = new Point();
-            Toast.makeText(mContext, "1", Toast.LENGTH_SHORT).show();
-            try{
+            //Toast.makeText(mContext, "1", Toast.LENGTH_SHORT).show();
+            try {
 
                 point.speed = (int) location.getSpeed() * 3600 / 1000;
                 point.latitude = location.getLatitude();
                 point.longitude = location.getLongitude();
                 point.trip_number = this.currentRideNum;
                 point.date = routingRepo.getDateTime();
-            }catch(Exception e){
-                Toast.makeText(mContext, "Print1:" +e.toString()+ e.getStackTrace(), Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Toast.makeText(mContext, "Print1:" + e.toString() + e.getStackTrace(), Toast.LENGTH_SHORT).show();
             }
             ////////////////////////////////////////////////////////////////
             /// Check if speed grate then limit if exists alert notification
@@ -299,16 +305,17 @@ public class LocationData extends Activity implements LocationListener {
             /////////////////////////////////////
             ////////////////////////////////////////
             /// UNMARK AFTER TEST
+            // Toast.makeText(mContext, "current location" + LocationData.currentLocation.toString(), Toast.LENGTH_SHORT).show();
             if (currentMaxSppeed > 0) {
                 point.limit = currentMaxSppeed;
                 if (point.speed > currentMaxSppeed) {
                     try {
-                        alertTools.checkCurrentSpeed(point.speed, currentMaxSppeed);
-                    }catch (Exception e){
-                        Toast.makeText(mContext, "Failed to checkk llimit", Toast.LENGTH_SHORT).show();
+                        alertTools.checkCurrentSpeed(point, currentMaxSppeed);
+                    } catch (Exception e) {
+                        Toast.makeText(mContext, "Failed to checkk limit", Toast.LENGTH_SHORT).show();
                     }
-                }else{
-                    if (lastState.equals("bad")){
+                } else {
+                    if (lastState.equals("bad")) {
                         alertTools.setFrameColor(R.drawable.sppeed_aert_border);
                     }
                     lastState = "good";
@@ -319,43 +326,82 @@ public class LocationData extends Activity implements LocationListener {
             /////////////////////////////////////////////////////////////////
             if (currentAddress != null) {
                 //point.place = currentAddress;
-
+             //   Toast.makeText(mContext, "place: " + currentAddress, Toast.LENGTH_SHORT).show();
             }
-            openStreetMap.getOSMData(point.latitude, point.longitude);
+
+            //Toast.makeText(mContext, "current location" + currentLocation.get("name").toString(), Toast.LENGTH_SHORT).show();
+            if (currentLocation.size() != 0) {
+                //Toast.makeText(mContext, currentLocation.get("boundingbox"), Toast.LENGTH_SHORT).show();
+                if (currentLocation.get("boundingbox") != null) {
+                    //JSONArray boundingBoxArr = new JSONArray(currentLocation.get("boundingbox"));
+                    JSONObject boundJsonObj = new JSONObject(currentLocation.get("boundingbox"));
+                    boundingArray[0] = Double.parseDouble(boundJsonObj.getString("minlat"));
+                    boundingArray[1] = Double.parseDouble(boundJsonObj.getString("maxlat"));
+                    boundingArray[2] = Double.parseDouble(boundJsonObj.getString("minlon"));
+                    boundingArray[3] = Double.parseDouble(boundJsonObj.getString("maxlon"));
+                }
+            }
+            String sameBox = "";
+            if ((boundingArray[0] != 0.0) && (currentLocation.get("name") != null || currentLocation.get("ref") != null) &&
+                    (boundingArray[0] < point.latitude && boundingArray[1] > point.latitude && boundingArray[2] < point.longitude && boundingArray[3] > point.longitude)) {
+                //Toast.makeText(mContext, "same osm_id", Toast.LENGTH_SHORT).show();
+                sameBox = "same box";
+            } else {
+
+                openStreetMap.getOSMData(point.latitude, point.longitude);
+            }
+
             accuracy = this.getAccuracy();
 //        location.limit
             //Toast.makeText(mContext, "2", Toast.LENGTH_SHORT).show();
             TextView textView_speed = (TextView) activity.findViewById(R.id.speed_number);
             // textView_speed.setText("" + point.speed);
             String pointParamsString = "Speed: " + point.speed + "\nLatitude: " + point.latitude + "\nLongitude: " + point.longitude +
-                    "\nAccuracy: " + String.format("%.2f", accuracy) + "\n Counter: " + this.counter++ +
-                    "\n Limit: " + point.limit + "\n";
-            Toast.makeText(mContext, "2.5", Toast.LENGTH_SHORT).show();
-            if(currentLocation != null && currentLocation.size() > 0) {
-            //    Toast.makeText(mContext, "2.6", Toast.LENGTH_SHORT).show();
-                if (currentLocation.get("road") != null) {
-                   pointParamsString = pointParamsString + mContext.getString(R.string.road) + ": " + currentLocation.get("road").toString();
-                   point.place = mContext.getString(R.string.road) + ": " + currentLocation.get("road").toString() +"\n";
+                    "\nAccuracy: " + String.format("%.2f", accuracy) + "\nCounter: " + this.counter++ +
+                    "\nLimit: " + point.limit + "\n " + sameBox +" \n";
+
+            //Toast.makeText(mContext, "2.5 size" + currentLocation.size(), Toast.LENGTH_SHORT).show();
+            if (currentLocation != null && currentLocation.size() > 0) {
+                //Toast.makeText(mContext, "3.5" + currentLocation.get("name"), Toast.LENGTH_SHORT).show();
+                if (currentLocation.get("ref") != null) {
+                    pointParamsString = pointParamsString + mContext.getString(R.string.road) + ": " + currentLocation.get("ref") + "\n";
+                    point.place = mContext.getString(R.string.road) + ": " + currentLocation.get("ref")  + " ";
                 }
+                if (currentLocation.get("name") != null) {
+                    pointParamsString = pointParamsString + mContext.getString(R.string.road) + ": " + currentLocation.get("name") + "\n";
+                    point.place = mContext.getString(R.string.road) + ": " + currentLocation.get("name");
+                } else {
+                    //Toast.makeText(mContext, "currentLocation 0", Toast.LENGTH_SHORT).show();
+                    point.place = null;
+                }
+
                 ///////////////////////////////////////////////
                 ////// check what language is defined
-             //   Toast.makeText(mContext, "2.7", Toast.LENGTH_SHORT).show();
+              //  Toast.makeText(mContext, "2.7", Toast.LENGTH_SHORT).show();
                 if (settingsList.get("language") != null) {
                     if (currentLocation.get("name:" + settingsList.get("language")) != null) {
                         pointParamsString = pointParamsString + "name: " +
                                 currentLocation.get("name:" + settingsList.get("language"));
                         point.place = point.place + currentLocation.get("name:" + settingsList.get("language"));
-                    }else{
+                    } else {
+                        if (currentLocation.get("name:en") != null) {
+                            pointParamsString = pointParamsString + "name: " +
+                                    currentLocation.get("name:en");
+                            point.place = point.place + currentLocation.get("name:en");
+                        }
+                    }
+                    //   Toast.makeText(mContext, "2.8", Toast.LENGTH_SHORT).show();
+                } else {
+                    //   Toast.makeText(mContext, "2.9", Toast.LENGTH_SHORT).show();
+                    if (currentLocation.get("name:en") != null) {
                         pointParamsString = pointParamsString + "name: " +
                                 currentLocation.get("name:en");
                         point.place = point.place + currentLocation.get("name:en");
                     }
-                 //   Toast.makeText(mContext, "2.8", Toast.LENGTH_SHORT).show();
-                }else{
-                 //   Toast.makeText(mContext, "2.9", Toast.LENGTH_SHORT).show();
-                    pointParamsString = pointParamsString  + "name: " +
-                            currentLocation.get("name:en");
-                    point.place = point.place + currentLocation.get("name:en");
+                }
+                if (currentLocation.get("ref") != null) {
+                    pointParamsString = pointParamsString + mContext.getString(R.string.road) + ": " + currentLocation.get("ref") + "\n";
+                    point.place = mContext.getString(R.string.road) + ": " + currentLocation.get("ref");
                 }
             }
             //Toast.makeText(mContext, "3", Toast.LENGTH_SHORT).show();
@@ -370,7 +416,8 @@ public class LocationData extends Activity implements LocationListener {
                         try {
                             routingRepo.insert(point);
                         } catch (NullPointerException e) {
-                            Log.i("INFO", e.toString());
+                            Log.i("INFO", e.getMessage());
+                            Toast.makeText(mContext, "Faill NULL " + e.getStackTrace(), Toast.LENGTH_SHORT).show();
                         }
                     }
                 }
@@ -385,18 +432,20 @@ public class LocationData extends Activity implements LocationListener {
                 TextView tv_unit = (TextView) activity.findViewById(R.id.speed_unit);
                 tv_unit.setText(unit);
             }
-            Toast.makeText(mContext, "4", Toast.LENGTH_SHORT).show();
+
+            //Toast.makeText(mContext, "4", Toast.LENGTH_SHORT).show();
             textView_speed.setText("" + visual_speed);
-        }catch (Exception e){
+
+        } catch (Exception e) {
             Log.i("INFO", e.toString());
-            Toast.makeText(mContext, e.toString()+ e.getStackTrace(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Fail:"  + e.getStackTrace(), Toast.LENGTH_SHORT).show();
 
         }
     }
 
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
-
+     //   Toast.makeText(mContext, "onStatuschanged", Toast.LENGTH_SHORT).show();
     }
 
     @Override

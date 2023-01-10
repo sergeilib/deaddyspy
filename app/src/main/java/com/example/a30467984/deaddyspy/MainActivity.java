@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Telephony;
@@ -30,11 +31,14 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.a30467984.deaddyspy.DAO.RoutingRepo;
 import com.example.a30467984.deaddyspy.DAO.Settings;
 import com.example.a30467984.deaddyspy.DAO.SettingsRepo;
 import com.example.a30467984.deaddyspy.Server.ServerConnection;
 import com.example.a30467984.deaddyspy.background.BackgroundBroadcastReceiver;
 import com.example.a30467984.deaddyspy.background.BackgroundHandler;
+import com.example.a30467984.deaddyspy.gps.LocationData;
+//import com.example.a30467984.deaddyspy.modules.Location;
 import com.example.a30467984.deaddyspy.utils.MyDevice;
 import com.example.a30467984.deaddyspy.utils.RequestHandler;
 import com.example.a30467984.deaddyspy.utils.SingleToneAuthToen;
@@ -54,6 +58,7 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import javax.mail.AuthenticationFailedException;
 import javax.net.ssl.HttpsURLConnection;
 import static android.content.ContentValues.TAG;
 
@@ -100,18 +105,34 @@ public class MainActivity extends AppCompatActivity {
 //        }
        // findViewById(R.id.text_frame_layout).setVisibility(View.VISIBLE);
        // findViewById(R.id.daddy_spy_first_constraint_layout).setVisibility(View.INVISIBLE);
-        //appServerInit();
+       // testLocation(settingsRepo);
+        appServerInit();
         MyAsyncTaskInit myAsyncTaskInit = new MyAsyncTaskInit();
         myAsyncTaskInit.execute();
         //findViewById(R.id.text_frame_layout).setVisibility(View.INVISIBLE);
         //findViewById(R.id.daddy_spy_first_constraint_layout).setVisibility(View.VISIBLE);
 //        MyDevice myDevice = new MyDevice(this,activity);
 //        myDevice.setWifiApState(this);
-        goToBackground();
-//        scheduleAlarm();
+        //goToBackground();
+        scheduleAlarm();
 
 
     }
+
+//    public void testLocation(SettingsRepo settingsRepo){
+//       // Location location = new Location();
+//
+//        int    offset = 0;
+//        RoutingRepo routingRepo = new RoutingRepo(this);
+//        ///////////////////////////////////////////////////////////////////
+//        int currentRideNum = routingRepo.getMaxTripNumber() + offset;
+//        HashMap settingsList = settingsRepo.getSettingsList();
+//        LocationData locationData = new LocationData(this,settingsList,this,currentRideNum);
+//        for (int i = 0 ; i<= 5; i++){
+//         //   locationData.onLocationChanged(location);
+//        }
+//
+//    }
 
     public void scheduleAlarm() {
         // Construct an intent that will execute the AlarmReceiver
@@ -485,8 +506,15 @@ public class MainActivity extends AppCompatActivity {
                 //JSONObject jsonObject = new JSONObject(params);
                 // RequestHandler requestHandler = new RequestHandler();
                 //requestHandler.sendPost(url,jsonObject);
-                ServerConnection serverConnection = new ServerConnection(getBaseContext(), activity);
-                serverConnection.getAuthRequest(object);
+                ServerConnection serverConnection = new ServerConnection(getBaseContext(), this);
+                try {
+                    serverConnection.getAuthRequest(object);
+                }catch (AuthenticationFailedException e){
+                    if(uniqueID == null){
+                        getUniqId(getBaseContext());
+                    }
+                    firstTimeInit(uniqueID);
+                }
             }else{
                 Toast.makeText(getApplicationContext(),"Can't establish connection with server",Toast.LENGTH_SHORT).show();
             }
@@ -507,10 +535,10 @@ public class MainActivity extends AppCompatActivity {
     {
         @Override
         protected Void doInBackground(Void... params) {
-            setContentView(R.layout.activity_main_init);
-            appServerInit();
+            //setContentView(R.layout.activity_main_init);
+            //appServerInit();
             //goToBackground();
-            scheduleAlarm();
+            //scheduleAlarm();
             return null;
         }
         @Override

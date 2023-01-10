@@ -1,18 +1,23 @@
 package com.example.a30467984.deaddyspy.Server;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
-import android.widget.Switch;
 import android.widget.Toast;
 
-import com.example.a30467984.deaddyspy.MapsActivity;
-import com.example.a30467984.deaddyspy.gps.LocationData;
+import com.example.a30467984.deaddyspy.NotificationReceiverActivity;
 import com.example.a30467984.deaddyspy.maps.DisplayMapWithMarkers;
 import com.example.a30467984.deaddyspy.modules.ConnectionResponse;
 import com.example.a30467984.deaddyspy.modules.TaskCompleted;
@@ -23,16 +28,10 @@ import com.example.a30467984.deaddyspy.utils.SingleToneServerListOfTrips;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import javax.mail.AuthenticationFailedException;
 
 /**
  * Created by 30467984 on 12/1/2019.
@@ -44,6 +43,7 @@ public class ServerConnection extends Activity implements TaskCompleted{
     private ConnectionResponse connectionResponse;
     private static final String AUTH_TKN = "AUTH_TKN";
     private static final String PREF_MY_DADDY = "PREF_MY_DADDY";
+    private static final int REQUEST_FROM_MASTER = 1;
 
     public ServerConnection(Context context, Activity activity){
         this.context = context;
@@ -111,7 +111,7 @@ public class ServerConnection extends Activity implements TaskCompleted{
         Log.i("INFO",String.valueOf(serverAsyncConnection.getStatus()));
     }
 
-    public void getAuthRequest(Object object){
+    public void getAuthRequest(Object object) throws AuthenticationFailedException {
         Log.i("INFO","SUBJECT getAuthRequest: " + object.toString());
         new ServerAsyncConnection(ServerConnection.this).execute(object);
         for (int sec = 0 ; sec < 10 ; sec++){
@@ -119,8 +119,22 @@ public class ServerConnection extends Activity implements TaskCompleted{
                 Thread.sleep(1000);
                 Log.i("INFO","ITERATION:" + sec );
                 if (connectionResponse.getStatus() != null) {
-                    if (connectionResponse.getStatus().equals("failure")){
-                        Log.i("INFO",connectionResponse.getError()  );
+                    if (connectionResponse.getStatus().equals("failure")) {
+                        Log.i("INFO", connectionResponse.getError());
+                        JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
+                        try {
+                            /////////////////////////////////////////////////////////////////////////////////////////
+                            //// IF token expired , get new one
+                            if (Integer.parseInt(jsonObj.get("code").toString()) != 1000) {
+                                Log.i("INFO", jsonObj.getString("message"));
+                                throw new AuthenticationFailedException("Token authentication failed");
+                            }
+                            /////////////////////////////////////////////////////////////////////
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (AuthenticationFailedException e) {
+                            throw new AuthenticationFailedException(e.getMessage());
+                        }
                         break;
                     }else {
 
@@ -188,15 +202,79 @@ public class ServerConnection extends Activity implements TaskCompleted{
 
         new ServerAsyncConnection(ServerConnection.this).execute(object);
 
-        JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
+       // JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
         try {
             Log.i("INFO","updateDaddyServer");
-            Log.i("INFO", jsonObj.get("token").toString());
-        }catch (JSONException j){
+            //Log.i("INFO", jsonObj.get("token").toString());
+        }catch (Exception j){
             Log.i("ERR",j.getMessage());
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void checkParentRequestExists(Object object){
+        new ServerAsyncConnection(ServerConnection.this).execute(object);
+        boolean connection_flag = false;
+        //JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
+        for (int sec = 0 ; sec < 3 ; sec++){
+            try {
+                Thread.sleep(1000);
+                Log.i("INFO","ITERATION:" + sec );
+                if (connectionResponse.getStatus() != null) {
+                    connection_flag = true;
+                    if (connectionResponse.getStatus().equals("failure")){
+                        Log.i("INFO",connectionResponse.getError()  );
+                        break;
+                    }else {
+                        connection_flag = true;
+                        try {
+                            JSONObject jsonObj = new JSONObject(connectionResponse.getMessage());
+                            if (jsonObj.get("json_result") != null){
+                                if ((jsonObj.getString("json_result")) != null){
+                                   /* Intent intent = new Intent(this.context, NotificationReceiverActivity.class);
+                                    PendingIntent pIntent = PendingIntent.getActivity(this.context, (int) System.currentTimeMillis(), intent, 0);
+
+                                    // Build notification
+                                    // Actions are just fake
+                                    Notification noti = new Notification.Builder(this.context)
+                                            .setContentTitle("New mail from " + "test@gmail.com")
+                                            .setContentText("Subject")
+                                            .setContentIntent(pIntent)
+                                            .build();
+                                    NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                                    notificationManager.notify(0,noti);*/
+                                   final String CHANNEL_ID = "HEADS_UP_NOTIFICATIONS";
+                                    NotificationChannel channel = new NotificationChannel(CHANNEL_ID,"MyNotif",NotificationManager.IMPORTANCE_HIGH);
+                                    getSystemService(NotificationManager.class).createNotificationChannel(channel);
+                                    Notification.Builder notification = new Notification.Builder(this,CHANNEL_ID)
+                                            .setContentTitle("New mail from " + "test@gmail.com")
+                                            .setContentText("Subject")
+                                            .setAutoCancel(true);
+                                    NotificationManagerCompat.from(this).notify(1,notification.build());
+                                }
+
+                            }
+                        }catch (JSONException e){
+
+                        }
+
+                        //SingleToneAuthToen singleToneAuthToen = SingleToneAuthToen.getInstance();
+
+                        break;
+                    }
+                    //JSONObject jsonObj = convertJson2Object(connectionResponse.getMessage());
+                }else{
+
+                }
+            }catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+        }
+        if(connection_flag == false ) {
+            Toast.makeText(context, "Can't check parent request", Toast.LENGTH_SHORT).show();
+        }
+    }
 
 
     public void getGroupLocation(Object object, HashMap phone2Contact){
@@ -268,7 +346,19 @@ public class ServerConnection extends Activity implements TaskCompleted{
         if (connectionResponse.getStatus().equals("success")) {
             connectionResponse.setMessage(result.get("message").toString());
         }else {
-            connectionResponse.setError(result.get("error").toString());
+            try {
+                JSONObject jsonObject = new JSONObject(result.get("message").toString());
+                connectionResponse.setError(jsonObject.getString("message"));
+                connectionResponse.setMessage(result.get("message").toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+                connectionResponse.setError("Unknown failure");
+            } catch (NullPointerException e){
+                e.printStackTrace();
+                connectionResponse.setError(result.get("status").toString());
+
+            }
+
         }
 
 
@@ -304,8 +394,14 @@ public class ServerConnection extends Activity implements TaskCompleted{
                 String postResponseStr = requestHandler.sendMethod((URL) obj[0], jsonObject, params.get("method"));
                 Log.i("INFO","RESPONSE" + postResponseStr);
                 if(postResponseStr != null) {
-                    postResponse.put("status", "success");
-                    postResponse.put("message", postResponseStr);
+                    JSONObject jsonResponse = new JSONObject(postResponseStr);
+                    if (jsonResponse.getString("error").equals("true")) {
+                        postResponse.put("status", "failure");
+                        postResponse.put("message", postResponseStr);
+                    } else {
+                        postResponse.put("status", "success");
+                        postResponse.put("message", postResponseStr);
+                }
                 }else{
                     postResponse.put("status","failure");
                     postResponse.put("error","No response from server");

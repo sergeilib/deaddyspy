@@ -15,6 +15,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Handler;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
@@ -39,8 +40,10 @@ import org.json.JSONObject;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -83,6 +86,7 @@ public class BackgroundHandler {
                 Thread.currentThread().interrupt();
             }
             handler.postDelayed(runnable = new Runnable() {
+                @RequiresApi(api = Build.VERSION_CODES.O)
                 @Override
                 public void run() {
                     handler.postDelayed(runnable,interval);
@@ -90,6 +94,8 @@ public class BackgroundHandler {
                     //checkPairedDevicesConnected();
                     checkIfPairedDeviceConected();
                     checkTripBackup(settingList);
+                    checkParentControlRequest();
+                    SETTINGS_CHANGE_FLAG = false;
                 }
             },interval);
 
@@ -116,9 +122,9 @@ public class BackgroundHandler {
         //////////////////////////////////////////////////////////////////////////////////
         private void checkTripBackup(HashMap settingList) {
             if (settingList.containsKey("trip_backup")) {
-                if (SETTINGS_CHANGE_FLAG == true){
+                if (BackgroundHandler.SETTINGS_CHANGE_FLAG == true){
                     settingList = getSettings();
-                    SETTINGS_CHANGE_FLAG = false;
+                   // SETTINGS_CHANGE_FLAG = false;
                 }
 
                 String ifTripBackup = ((HashMap<String, String>) settingList.get("trip_backup")).get("value");
@@ -141,6 +147,7 @@ public class BackgroundHandler {
                     JSONArray innerJsonArray = new JSONArray();
                     String android_id = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
                     HashMap keyHash = getTripHistoryFields();
+                    Set<Integer> tripList = new HashSet<Integer>();
                     for (HashMap row: backupData) {
                         Iterator<Map.Entry<String,String>> it = row.entrySet().iterator();
                         JSONObject rowJsonObj = new JSONObject();
@@ -150,6 +157,9 @@ public class BackgroundHandler {
                                 String key = pair.getKey();
                                 if (keyHash.get(key) != null) {
                                     rowJsonObj.put(keyHash.get(key).toString(), pair.getValue());
+                                    if (key.equals("trip_number")){
+                                        tripList.add(Integer.parseInt(pair.getValue()));
+                                    }
                                 } else{
                                     continue;
                                 }
@@ -170,16 +180,23 @@ public class BackgroundHandler {
 
 
                         String url_suffix = "location/update_trip_history?android_id=" +  android_id;
-                        Object object = prepareConnectionObject(url_suffix,jsonObject);
+                        Object object = prepareConnectionObject(url_suffix,jsonObject,"POST");
 
                         if (object != null) {
                             try {
                                 updateServerTripBackup(object);
                             } catch (Exception e) {
-                                Log.i("ERROR", "CHeckSharingLoocation" + e.getMessage());
+                                Log.i("ERROR", "CHeckTripBackup" + e.getMessage());
+                                return;
+                            }
+                            /// if update of server succeeded so update backup flag in order to avoid backup repeat
+                            for (int trip : tripList) {
+
+                                routingRepo.updateBackupFlagByTrip(trip);
+
                             }
                         } else {
-                            Log.i("INFO", "The token is NULL, Can't update location");
+                            Log.i("INFO", "The token is NULL, Can't update backup");
                         }
 
 
@@ -194,7 +211,7 @@ public class BackgroundHandler {
             if (settingList.containsKey("sharing_location")) {
                 if (SETTINGS_CHANGE_FLAG == true){
                     settingList = getSettings();
-                    SETTINGS_CHANGE_FLAG = false;
+                   // SETTINGS_CHANGE_FLAG = false;
                 }
                 String ifShareLocation = ((HashMap<String, String>) settingList.get("sharing_location")).get("value");
                 if (ifShareLocation.equals("true")) {
@@ -206,7 +223,7 @@ public class BackgroundHandler {
                         String android_id = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
                         String url_suffix = "location/sharing_location?phone=" + phone + "&android_id=" +  android_id + "&last_longitude=" + longitude +
                                 "&last_latitude=" + latitude;
-                        Object object = prepareConnectionObject(url_suffix,null);
+                        Object object = prepareConnectionObject(url_suffix,null,"POST");
                         if(object != null) {
                             try {
                                 updateServerSharingLlocation(object);
@@ -219,6 +236,28 @@ public class BackgroundHandler {
                     }
 
                 }
+            }
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// this method check on server if exists parent request to share location
+        ////////////////////////////////////////////////////////////////////////////////
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        public void checkParentControlRequest(){
+            String android_id = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+            String url_suffix = "linkage/check_parent_control_request?android_id=" +  android_id;
+            Object object = prepareConnectionObject(url_suffix,null,"GET");
+
+            if(object != null) {
+
+                try {
+                    //updateServerSharingLlocation(object);
+
+                    serverConnection.checkParentRequestExists(object);
+                } catch (Exception e) {
+                    Log.i("ERROR", "CHeck Parent request" + e.getMessage());
+                }
+            }else {
+                Log.i("INFO", "The token is NULL, Can't update location");
             }
         }
 
@@ -258,11 +297,20 @@ public class BackgroundHandler {
         return finalLoc;
     }
 
-    public Object prepareConnectionObject(String url_suffix,JSONObject body){
+    public Object prepareConnectionObject(String url_suffix,JSONObject body,String method){
+            if (method == null){
+                method = "POST";
+            }
+        String tkn = getSessionToken();
+        if (tkn == null){
+            //ServerConnection serverConnection = new ServerConnection(context, activity);
+            //serverConnection.getAuthRequest(object);
+            return null;
+        }
         Object[] object = new Object[2];
         URL url = null;
         try {
-            url = new URL(path + url_suffix);
+            url = new URL(path + url_suffix  +"&token=" + tkn);
         }catch (MalformedURLException m){
             Log.i("ERR",m.getMessage());
         }
@@ -270,14 +318,10 @@ public class BackgroundHandler {
 
         HashMap<String,String> params = new HashMap<>();
 
-        String tkn = getSessionToken();
-        if (tkn == null){
-            //ServerConnection serverConnection = new ServerConnection(context, activity);
-            //serverConnection.getAuthRequest(object);
-            return null;
-        }
+
+
         params.put("token", tkn);
-        params.put("method", "POST");
+        params.put("method", method);
         if(body != null) {
             try {
                 params.put("data", body.get("data").toString());

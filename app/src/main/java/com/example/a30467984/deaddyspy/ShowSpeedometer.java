@@ -2,6 +2,7 @@ package com.example.a30467984.deaddyspy;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -16,7 +17,10 @@ import com.example.a30467984.deaddyspy.DAO.Settings;
 import com.example.a30467984.deaddyspy.DAO.SettingsRepo;
 import com.example.a30467984.deaddyspy.gps.LocationData;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class ShowSpeedometer extends AppCompatActivity {
@@ -26,12 +30,22 @@ public class ShowSpeedometer extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         //DatabaseHelper db = new DatabaseHelper(this);
         setContentView(R.layout.activity_show_speedometer);
+        //// this activity will be allways portrait
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         Settings settings = new Settings();
         SettingsRepo settingsRepo = new SettingsRepo(this);
 //        settingsRepo.dropSettingsTable();
         RoutingRepo routingRepo = new RoutingRepo(this);
 //        routingRepo.dropRoutingTable();
-        int currentRideNum = routingRepo.getMaxTripNumber() + 1;
+        /////////////////////////////////////////////////////////////////
+        // if interval from the last update less than 10 min so proceed with last trip number
+        ///////////////////////////////////////////////////////////////////////////
+        int offset = 1;
+        if (getTimeInterval(routingRepo.getLastUpdateDate()) < 600){
+            offset = 0;
+        }
+        ///////////////////////////////////////////////////////////////////
+        int currentRideNum = routingRepo.getMaxTripNumber() + offset;
         HashMap settingsList = settingsRepo.getSettingsList();
         LocationData locationData = new LocationData(this,settingsList,this,currentRideNum);
         Point point = new Point();
@@ -64,6 +78,24 @@ public class ShowSpeedometer extends AppCompatActivity {
         }
         //// DISPLAY SPEED
         textView_speed.setText("" + visual_speed);
+    }
+
+    public long getTimeInterval(String lastUpdateDate) {
+        if (lastUpdateDate == null){
+            return 100000;
+        }
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        try {
+
+            Date lastUpdate = dateFormat.parse(lastUpdateDate);
+            Date curDate = dateFormat.parse(dateFormat.format(new Date()));
+
+            long interval_in_sec =  curDate.getTime() - lastUpdate.getTime();
+            return  interval_in_sec;
+        }catch (Exception e){
+            return 1000000;
+        }
     }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)

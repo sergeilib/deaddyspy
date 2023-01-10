@@ -423,6 +423,7 @@ public class AlertManagerActivity extends AppCompatActivity{
                     final RadioButton radioSelectedButton = (RadioButton) dialog.findViewById(selectedId);
                     Toast.makeText(context, radioSelectedButton.getText(), Toast.LENGTH_SHORT).show();
                     CheckBox soundNotif = (CheckBox) dialog.findViewById(R.id.checkboxSoundNotif);
+                    EditText daddyNum = (EditText) dialog.findViewById(R.id.editDaddyNumberAlert);
                     EditText emailET = (EditText) dialog.findViewById(R.id.editTextAlertEmail);;
                     EditText smsET = (EditText) dialog.findViewById(R.id.editTextSMS);
                     EditText intervalET = (EditText) dialog.findViewById(R.id.editTextAllertInterval);
@@ -446,6 +447,12 @@ public class AlertManagerActivity extends AppCompatActivity{
                         alert.setType("Notification");
                         alert.setParam("sound");
                         alert.setValue("default");
+                        alertRepo.insert(alert);
+                    }
+                    if (daddyNum.getText() != null){
+                        alert.setType("Notification");
+                        alert.setParam("daddy_number");
+                        alert.setValue(emailET.getText().toString());
                         alertRepo.insert(alert);
                     }
                     if(emailET.getText() != null){
@@ -481,6 +488,9 @@ public class AlertManagerActivity extends AppCompatActivity{
             textView.append(getString(R.string.notification) + ": \n");
             if(alertDetails.getNotificationDetails().getSound() != null){
                 textView.append(  getString(R.string.sound_notification) + ":" + " " + alertDetails.getNotificationDetails().getSound()+"\n");
+            }
+            if(alertDetails.getNotificationDetails().getDaddyNumber() != null){
+                textView.append(  getString(R.string.daddy_number) + ":" + " " + alertDetails.getNotificationDetails().getDaddyNumber()+"\n");
             }
             if(alertDetails.getNotificationDetails().getEmail() != null){
                 textView.append(  getString(R.string.email) + ":" + " " + alertDetails.getNotificationDetails().getEmail()+"\n");

@@ -7,24 +7,49 @@ import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.graphics.drawable.shapes.Shape;
 import android.net.MailTo;
+import android.os.AsyncTask;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.ScrollView;
+import android.widget.TableLayout;
 import android.widget.Toast;
 
+import com.example.a30467984.deaddyspy.AlertManagerActivity;
 import com.example.a30467984.deaddyspy.DAO.Alert;
 import com.example.a30467984.deaddyspy.DAO.AlertLog;
 import com.example.a30467984.deaddyspy.DAO.AlertRepo;
+import com.example.a30467984.deaddyspy.DAO.Point;
+import com.example.a30467984.deaddyspy.HistoryManagerActivity;
 import com.example.a30467984.deaddyspy.R;
+import com.example.a30467984.deaddyspy.ShowSpeedometer;
 import com.example.a30467984.deaddyspy.gps.LocationData;
 import com.example.a30467984.deaddyspy.modules.AlertDetails;
+import com.example.a30467984.deaddyspy.modules.ConnectionResponse;
 import com.example.a30467984.deaddyspy.modules.DateConversion;
+import com.example.a30467984.deaddyspy.modules.TaskCompleted;
+import com.example.a30467984.deaddyspy.utils.Common;
+import com.example.a30467984.deaddyspy.utils.CsvCreator;
+import com.example.a30467984.deaddyspy.utils.RequestHandler;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.ConnectException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+
+import static android.view.Gravity.BOTTOM;
 
 /**
  * Created by 30467984 on 3/13/2019.
@@ -68,8 +93,9 @@ public class AlertTools {
         return alertsStatusHash;
     }
 
-    public void checkCurrentSpeed(int speed, int limit) {
-        Toast.makeText(context, "Start Alert",Toast.LENGTH_SHORT).show();
+    public void checkCurrentSpeed(Point point, int limit) {
+        int speed = point.speed;
+        //Toast.makeText(context, "Start Alert",Toast.LENGTH_SHORT).show();
         if (speed > 0 && limit > 0 && LocationData.lastState.equals("good")) {
             LocationData.lastState = "bad";
             HashMap<String, String> alertsStatusHash = fetchAlertsName();
@@ -81,7 +107,7 @@ public class AlertTools {
                         Map alertDetails = alertRepo.getAlertValuesByName(name.toString());
                         alertDetails.put("alertName",name);
                         if (checkIfAlertOverLimit(speed, limit, alertDetails)) {
-                            checkNotifications(alertDetails);
+                            checkNotifications(alertDetails,point,limit);
                         }
                     }
 
@@ -125,7 +151,7 @@ public class AlertTools {
     /////////////////////////////////////////
     //// CHECK ALERT FOR ALL NOTIFICATIOONS METHODS
 
-    public void checkNotifications(Map alertsDetais) {
+    public void checkNotifications(Map alertsDetais, Point point,int limit) {
         NotificationTools tools = new NotificationTools(context);
         if (alertsDetais.containsKey("sound")) {
             tools.getSoundNotification();
@@ -146,6 +172,15 @@ public class AlertTools {
         }else{
             return;
         }
+        ////////////////////////////////////////////////////////////////////
+        //// if configured daddy number  app will update the server in case of speed alert
+        /// //////////////////////////////////////////////////////////////////////////
+        if(alertsDetais.containsKey("daddy_number")){
+            String message = getDaddyNumMessage(alertsDetais);
+
+            //tools.sendEmailAuto(alertsDetais.get("daddy_number").toString(),"Speed Allert",message);
+            speedAlertUpdateServer(point,limit);
+        }
 
         if(alertsDetais.containsKey("email")){
             String message = getEmailMessage(alertsDetais);
@@ -156,6 +191,11 @@ public class AlertTools {
             String message = getSMSMessage();
         }
 
+
+    }
+
+    public String getDaddyNumMessage(Map alertDetails){
+        return "bla";
     }
 
     public String getEmailMessage(Map alertDetails){
@@ -166,5 +206,154 @@ public class AlertTools {
     public String getSMSMessage(){
 
         return "bla";
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    /// update server with points atributes and limit
+    //////////////////////////////////////////////////////////////////////////
+    private void speedAlertUpdateServer(Point point, int limit){
+        String android_id = android.provider.Settings.Secure.getString(this.context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+        String url_suffix = "location/get_selected_trip?android_id=" +  android_id;
+        Object object = prepareConnectionObject(url_suffix,null,"POST");
+
+        if (object != null) {
+
+        } else {
+            Toast.makeText(this.context, "Can't connect server", Toast.LENGTH_LONG).show();
+            Log.i("INFO", "The token is NULL, Can't connect to server");
+            return;
+        }
+
+        Log.i("INFO","SUBJECT getAuthRequest: " + object.toString());
+        ConnectionResponse connectionResponse = new ConnectionResponse();
+        ServerAsyncConnection serverAsyncConnection = new ServerAsyncConnection(context);
+        try{
+            serverAsyncConnection.execute(object);
+        }catch (Exception e){
+            Log.i("ERROR",e.getMessage());
+        }
+
+
+    }
+
+    public Object prepareConnectionObject(String url_suffix, JSONObject body,String method){
+        String tkn = Common.getSessionToken();
+        if (tkn == null){
+            //ServerConnection serverConnection = new ServerConnection(context, activity);
+            //serverConnection.getAuthRequest(object);
+            return null;
+        }
+        Object[] object = new Object[2];
+        URL url = null;
+        try {
+
+            url = new URL(Common.getBaseUrlFromConfigProperties(context) + url_suffix +"&token=" + tkn );
+        }catch (MalformedURLException m){
+            Log.i("ERR",m.getMessage());
+        }
+        object[0] = url;
+
+        HashMap<String,String> params = new HashMap<>();
+
+
+        params.put("token", tkn);
+        params.put("method", method);
+        if (method.equals("POST")) {
+            if (body != null) {
+                try {
+                    params.put("data", body.get("data").toString());
+                    //params.put("android_id",body.get("android_id").toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }else{
+            // url_suffix = url_suffix + "&token="+ tkn;
+        }
+        object[1] = params;
+        //JSONObject jsonObject = new JSONObject(params);
+        // RequestHandler requestHandler = new RequestHandler();
+        //requestHandler.sendPost(url,jsonObject);
+        //ServerConnection serverConnection = new ServerConnection(context, activity);
+        //serverConnection.getAuthRequest(object);
+        return object;
+    }
+    public class ServerAsyncConnection extends AsyncTask<Object, Void, HashMap<String,String>> {
+        // onPreExecute called before the doInBackgroud start for display
+        // progress dialog.
+        public TaskCompleted mCallback;
+
+        public ServerAsyncConnection(Context context){
+            this.mCallback = (TaskCompleted) context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+//            pd = ProgressDialog.show(MainActivity.this, "", "Loading", true,
+//                    false); // Create and show Progress dialog
+        }
+
+        @Override
+        protected HashMap<String,String> doInBackground(Object... objects) {
+            Log.i("INFO","doInBackground "+ objects[0].toString() );
+            Object[] obj = (Object[]) objects[0];
+            URL url = (URL)obj[0];
+            HashMap<String,String> params = (HashMap<String,String>)obj[1];
+            JSONObject jsonObject = new JSONObject(params);
+            RequestHandler requestHandler = new RequestHandler(context,AlertTools.this.activity );
+            HashMap postResponse = new HashMap<String,String> ();
+            try {
+                String postResponseStr = requestHandler.sendMethod((URL) obj[0], jsonObject, params.get("method"));
+                Log.i("INFO","RESPONSE" + postResponseStr);
+                if(postResponseStr != null) {
+                    postResponse.put("status", "success");
+                    postResponse.put("message", postResponseStr);
+                }else{
+                    postResponse.put("status","failure");
+                    postResponse.put("error","No response from server");
+                }
+
+            }catch (Exception e){
+                Log.i("ERROR",e.getMessage());
+                postResponse.put("status","failure");
+                postResponse.put("error",e.getMessage());
+            }
+            Log.i("INFO","EXIT doInBackgraond");
+            mCallback.onTaskComlete(postResponse);
+            return postResponse;
+
+        }
+
+        // onPostExecute displays the results of the doInBackgroud and also we
+        // can hide progress dialog.
+        @Override
+        protected void onPostExecute(HashMap<String,String> result) {
+            Log.i("INFO","Request Result " + result.get("status").toString());
+            //mCallback.onTaskComlete(result);
+            /*connectionResponse.setStatus(result.get("status").toString());
+            if (connectionResponse.getStatus().equals("success")) {
+                connectionResponse.setMessage(result.get("message").toString());
+            }else {
+                connectionResponse.setError(result.get("error").toString());
+            }*/
+            //pd.dismiss();
+            //tvData.setText(result);
+            // TextView tv_pointParams = (TextView) activity.findViewById(R.id.low_textView_location);
+            //((LocationData) Activity.getApplication()).setCurrentAddress(result.get("address"));
+
+        }
+    }
+    private JSONObject convertJson2Object(String json){
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(json);
+            // Log.i("INFO",jsonObject.getString("token"));
+            //JSONObject jsonObject = new JSONObject("\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OTQsImlhdCI6MTYwNDQ3ODc4OCwiZXhwIjoxNjA0NTY1MTg4fQ.eDojL9xwKuyVIB5l3Xz-DalBOzNVl4A4y-pOdi6CXFY\",\"func\":\"get_tmp_tkn\",\"code\":\"1000\",\"error\":\"false\"");
+            // return jsonObject;
+        }catch (JSONException e){
+            Log.i("ERROR",e.getMessage());
+        }
+        return jsonObject;
     }
 }

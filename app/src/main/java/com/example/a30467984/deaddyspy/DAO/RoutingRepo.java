@@ -77,7 +77,7 @@ public class RoutingRepo {
 
         values.put(Point.KEY_backup,1);
         // It's a good practice to use parameter ?, instead of concatenate string
-        db.update(Point.TABLE, values, Point.KEY_backup + "= ?", new String[] { String.valueOf(trip_number) });
+        db.update(Point.TABLE, values, Point.KEY_tripNum + "= ?", new String[] { String.valueOf(trip_number) });
         db.close(); // Closing database connection
     }
 
@@ -310,6 +310,19 @@ public class RoutingRepo {
             return id;
         }
         return 0;
+    }
+
+    public String getLastUpdateDate(){
+        SQLiteDatabase db = databaseHelper.getReadableDatabase();
+        String selectQuery =  "SELECT  MAX(" + Point.KEY_date + ") FROM " + Point.TABLE;
+//        Cursor cursor = db.query(Location.TABLE,null,selectQuery,null,null,null,null); //where en like '"+name+"%'");
+        Cursor cursor = db.rawQuery(selectQuery,null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            String date= cursor.getString(0);
+            return date;
+        }
+        return null;
     }
     public void dropRoutingTable(){
         SQLiteDatabase db = databaseHelper.getWritableDatabase();

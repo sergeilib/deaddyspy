@@ -47,7 +47,7 @@
     <string name="show_on_map">show map</string>
     <string name="location_sharing">location sharing</string>
 
-    <string-array name="DialingCountryCode" >
+    <string-array name="DialingCountryCode">
         <item>32,BE</item>
         <item>501,BZ</item>
         <item>229,BJ</item>
@@ -262,4 +262,14 @@
     <string name="start_hotspot">start hotspot</string>
     <string name="backup_trip_history">backup trip history</string>
     <string name="backup_on_wifi_only">backup with wifi connection only</string>
+    <string name="title_activity_notification_receiver">NotificationReceiverActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="daddy_number">daddy number</string>
 </resources>

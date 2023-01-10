@@ -52,4 +52,5 @@
     <string name="start_hotspot">הפעל נקודה חמה</string>
     <string name="backup_trip_history">גיבוי היסטורית הנסיעות</string>
     <string name="backup_on_wifi_only">גיבוי רק עם חיבור WIFI</string>
+    <string name="startup_trigger">טריגר הפעלה</string>
 </resources>

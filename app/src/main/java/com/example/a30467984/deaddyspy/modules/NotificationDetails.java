@@ -7,6 +7,7 @@ package com.example.a30467984.deaddyspy.modules;
 public class NotificationDetails {
     private String notificationName;
     private String sound;
+    private String daddyNumber;
     private String email;
     private String sms;
     private String status;
@@ -42,6 +43,14 @@ public class NotificationDetails {
 
     public void setSms(String sms) {
         this.sms = sms;
+    }
+
+    public String getDaddyNumber() {
+        return daddyNumber;
+    }
+
+    public void setDaddyNumber(String daddyNumber) {
+        this.daddyNumber = daddyNumber;
     }
 
     public String getStatus() {

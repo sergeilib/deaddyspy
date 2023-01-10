@@ -11,7 +11,7 @@
     <android.support.constraint.ConstraintLayout
         android:id="@+id/table_background_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:background="@color/tableBackground"
         android:orientation="vertical"
         android:visibility="visible">
@@ -84,8 +84,8 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="22dp"
             android:layout_marginRight="22dp"
-            android:text="@string/history_button_last"
             android:onClick="openLastRideFromServer"
+            android:text="@string/history_button_last"
             appp:layout_constraintEnd_toStartOf="@+id/history_list_on_server_button"
             appp:layout_constraintStart_toStartOf="parent"
             appp:layout_constraintTop_toBottomOf="@+id/textview_on_server" />
@@ -99,8 +99,8 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="63dp"
             android:layout_marginRight="63dp"
-            android:text="@string/history_button_list"
             android:onClick="openHistoryListFromServer"
+            android:text="@string/history_button_list"
             appp:layout_constraintEnd_toEndOf="parent"
             appp:layout_constraintStart_toEndOf="@+id/last_ride_on_server_button"
             appp:layout_constraintTop_toBottomOf="@+id/textview_on_server" />
@@ -149,13 +149,15 @@
         <ListView
             android:id="@+id/history_list_view"
             android:layout_width="wrap_content"
-            android:layout_height="448dp"
+            android:layout_height="700dp"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:choiceMode="multipleChoice"
             android:divider="#f00"
-            android:dividerHeight="1dp"
-            appp:layout_constraintEnd_toEndOf="parent">
+            android:dividerHeight="2dp"
+            android:background="@color/color_white"
+            appp:layout_constraintEnd_toEndOf="parent"
+            andr:ignore="MissingConstraints">
 
 
         </ListView>
@@ -168,7 +170,8 @@
             android:onClick="openHistoryItem"
             android:text="show"
             andr:layout_editor_absoluteX="33dp"
-            appp:layout_constraintTop_toBottomOf="@id/history_list_view" />
+            appp:layout_constraintTop_toBottomOf="@id/history_list_view"
+            andr:ignore="MissingConstraints" />
 
         <Button
             android:id="@+id/button_remove_ride"
@@ -183,5 +186,50 @@
 
     </android.support.constraint.ConstraintLayout>
 
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/constraint_history_list_from_server"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
+        <ListView
+            android:id="@+id/history_list_view_from_server"
+            android:layout_width="wrap_content"
+            android:layout_height="700dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:choiceMode="multipleChoice"
+            android:divider="#f00"
+            android:dividerHeight="1dp"
+            android:background="@color/color_white"
+            appp:layout_constraintEnd_toEndOf="parent"
+            andr:ignore="MissingConstraints">
+
+
+        </ListView>
+
+        <Button
+            android:id="@+id/button_open_ride_from_server"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:onClick="getSelectedTripFromServer"
+            android:text="show"
+            andr:layout_editor_absoluteX="33dp"
+            appp:layout_constraintTop_toBottomOf="@id/history_list_view_from_server"
+            andr:ignore="MissingConstraints" />
+
+        <Button
+            android:id="@+id/button_remove_ride_from_server"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="160dp"
+            android:gravity="center"
+            android:onClick="removeHistoryItemsFromServer"
+            android:text="remove"
+            appp:layout_constraintLeft_toRightOf="@id/button_open_ride_from_server"
+            appp:layout_constraintTop_toBottomOf="@id/history_list_view_from_server"
+            andr:ignore="OnClick" />
+
+    </android.support.constraint.ConstraintLayout>
 </FrameLayout>

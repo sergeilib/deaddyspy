@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import static com.example.a30467984.deaddyspy.R.layout.activity_maps;
+
 /**
  * Created by 30467984 on 8/29/2018.
  */
@@ -36,7 +38,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        setContentView(activity_maps);
         Intent i = getIntent();
         rideData = (ArrayList) i.getSerializableExtra("RideData");
 
